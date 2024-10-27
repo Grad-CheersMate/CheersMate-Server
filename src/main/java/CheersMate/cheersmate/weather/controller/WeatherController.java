@@ -24,7 +24,7 @@ public class WeatherController {
     }
 
     @GetMapping("/weather")
-    public List<WeatherData> getWeatherData() {
-        return repository.findAll();
+    public WeatherData getLatestWeatherData() {
+        return repository.findTopByOrderByWeatherDateDescWeatherTimeDesc();
     }
 }
