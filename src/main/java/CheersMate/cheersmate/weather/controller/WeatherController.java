@@ -15,7 +15,6 @@ import java.util.List;
 public class WeatherController {
 
     private final WeatherService weatherService;
-    private final WeatherDataRepository repository;
 
     @GetMapping("/weather/fetch")
     public String fetchWeatherData() {
@@ -25,6 +24,6 @@ public class WeatherController {
 
     @GetMapping("/weather")
     public WeatherData getLatestWeatherData() {
-        return repository.findTopByOrderByWeatherDateDescWeatherTimeDesc();
+        return weatherService.getLatestWeatherData();
     }
 }

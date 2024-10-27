@@ -6,7 +6,10 @@ import CheersMate.cheersmate.weather.repository.WeatherDataRepository;
 import lombok.RequiredArgsConstructor;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 
@@ -24,10 +27,22 @@ import java.time.format.DateTimeFormatter;
 @RequiredArgsConstructor
 public class WeatherService {
 
+    private static final Logger logger = LoggerFactory.getLogger(WeatherService.class);
+
     private final WeatherDataRepository repository;
 
     @Value("${weather.api.serviceKey}")
     private String serviceKey;
+
+    /**
+     * 스케줄링 메서드. 크론 표현식은 application.yml에서 주입됩니다.
+     * 매 10분마다 실행됩니다.
+     */
+    @Scheduled(cron = "${weather.scheduling.cron}")
+    public void scheduledFetchAndSave() {
+        logger.info("Scheduled task started: Fetching and saving weather data.");
+        fetchAndSaveWeatherData();
+    }
 
     public void fetchAndSaveWeatherData() {
         try {
@@ -179,6 +194,11 @@ public class WeatherService {
             case "4": return "소나기";
             default: return "알 수 없음";
         }
+    }
+
+    //가장 최근 날씨 데이터 조회
+    public WeatherData getLatestWeatherData() {
+        return repository.findTopByOrderByWeatherDateDescWeatherTimeDesc();
     }
 }
 
