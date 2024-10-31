@@ -83,8 +83,8 @@ public class WeatherService {
         urlBuilder.append("&" + URLEncoder.encode("dataType", "UTF-8") + "=" + URLEncoder.encode("JSON", "UTF-8"));
         urlBuilder.append("&" + URLEncoder.encode("base_date", "UTF-8") + "=" + URLEncoder.encode(baseDate, "UTF-8"));
         urlBuilder.append("&" + URLEncoder.encode("base_time", "UTF-8") + "=" + URLEncoder.encode(baseTime, "UTF-8"));
-        urlBuilder.append("&" + URLEncoder.encode("nx", "UTF-8") + "=" + URLEncoder.encode("55", "UTF-8"));
-        urlBuilder.append("&" + URLEncoder.encode("ny", "UTF-8") + "=" + URLEncoder.encode("127", "UTF-8"));
+        urlBuilder.append("&" + URLEncoder.encode("nx", "UTF-8") + "=" + URLEncoder.encode("63", "UTF-8"));
+        urlBuilder.append("&" + URLEncoder.encode("ny", "UTF-8") + "=" + URLEncoder.encode("124", "UTF-8"));
 
         URL url = new URL(urlBuilder.toString());
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -118,13 +118,22 @@ public class WeatherService {
         JSONObject items = body.getJSONObject("items");
         JSONArray itemArray = items.getJSONArray("item");
 
+        // 필요한 변수들을 미리 선언
+        String precipitationTypeCode = "0";
+        String humidity = "0";
+        String hourlyPrecipitation = "0";
+        String temperature = "0";
+        String windSpeed = "0";
+
         // 날짜와 시간 설정
         if (itemArray.length() > 0) {
             JSONObject firstItem = itemArray.getJSONObject(0);
             String baseDate = firstItem.getString("baseDate");
             String baseTime = firstItem.getString("baseTime");
-            weatherData.setWeatherDate(LocalDate.parse(baseDate, DateTimeFormatter.ofPattern("yyyyMMdd")));
-            weatherData.setWeatherTime(LocalTime.parse(baseTime, DateTimeFormatter.ofPattern("HHmm")));
+            weatherData.setWeatherDate(
+                    LocalDate.parse(baseDate, DateTimeFormatter.ofPattern("yyyyMMdd")));
+            weatherData.setWeatherTime(
+                    LocalTime.parse(baseTime, DateTimeFormatter.ofPattern("HHmm")));
         }
 
         // 각 카테고리에 따라 값 매핑
@@ -135,15 +144,19 @@ public class WeatherService {
 
             switch (category) {
                 case "PTY": // 강수 형태
+                    precipitationTypeCode = value;
                     weatherData.setPrecipitationType(getPrecipitationType(value));
                     break;
                 case "REH": // 습도
+                    humidity = value;
                     weatherData.setHumidity(value);
                     break;
                 case "RN1": // 1시간 강수량
+                    hourlyPrecipitation = value;
                     weatherData.setHourlyPrecipitation(value);
                     break;
                 case "T1H": // 기온
+                    temperature = value;
                     weatherData.setTemperature(value);
                     break;
                 case "UUU": // 동서 바람 성분
@@ -156,6 +169,7 @@ public class WeatherService {
                     weatherData.setVComponentWind(value);
                     break;
                 case "WSD": // 풍속
+                    windSpeed = value;
                     weatherData.setWindSpeed(value);
                     break;
                 default:
@@ -164,7 +178,60 @@ public class WeatherService {
             }
         }
 
+        // **날씨 상태 결정 로직 추가**
+        String weatherCondition = determineWeatherCondition(
+                precipitationTypeCode, humidity, hourlyPrecipitation, temperature, windSpeed);
+        weatherData.setWeatherCondition(weatherCondition);
+
         return weatherData;
+    }
+
+    // **날씨 상태 결정 메서드 추가**
+    private String determineWeatherCondition(
+            String ptyCode, String rehValue, String rn1Value, String t1hValue, String wsdValue) {
+        try {
+            // 문자열 값을 숫자로 변환
+            int pty = Integer.parseInt(ptyCode);
+            int reh = Integer.parseInt(rehValue);
+            double rn1 = Double.parseDouble(rn1Value);
+            double t1h = Double.parseDouble(t1hValue);
+            double wsd = Double.parseDouble(wsdValue);
+
+            // 날씨 상태 변수
+            String condition = "맑음";
+
+            // 1. 비 또는 눈
+            if (pty == 1 || pty == 2 || pty == 4) {
+                condition = "비";
+            } else if (pty == 3) {
+                condition = "눈";
+            }
+            // 2. 흐림
+            else if (reh >= 80 && pty == 0) {
+                condition = "흐림";
+            }
+            // 3. 더운 날
+            else if (t1h >= 30) {
+                condition = "더운 날";
+            }
+            // 4. 추운 날
+            else if (t1h <= 5) {
+                condition = "추운 날";
+            }
+            // 5. 바람 부는 날
+            else if (wsd >= 8) {
+                condition = "바람 부는 날";
+            }
+            // 6. 맑음
+            else {
+                condition = "맑음";
+            }
+
+            return condition;
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+            return "데이터 오류";
+        }
     }
 
     // base_time 계산 로직
@@ -195,6 +262,7 @@ public class WeatherService {
             default: return "알 수 없음";
         }
     }
+
 
     //가장 최근 날씨 데이터 조회
     public WeatherData getLatestWeatherData() {

@@ -28,4 +28,6 @@ public class WeatherData {
     private String vComponentWind; // 남북 바람 성분
     private String windSpeed; // 풍속
     private String temperature; // 기온
+
+    private String weatherCondition; // 날씨 상태 추가
 }
