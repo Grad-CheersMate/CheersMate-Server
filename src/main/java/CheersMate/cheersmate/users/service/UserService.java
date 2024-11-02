@@ -61,18 +61,18 @@ public class UserService {
         return null;
     }
 
-    public Users findEmail(String phone, String nickname) {
-        return userRepository.findByPhoneAndNickname(phone, nickname);
+    public Users findEmail(String tell, String nickname) {
+        return userRepository.findByTellAndNickname(tell, nickname);
     }
 
-    public Users findPass(String email, String phone) {
-        return userRepository.findByEmailAndPhone(email, phone);
+    public Users findPass(String email, String tell) {
+        return userRepository.findByEmailAndTell(email, tell);
     }
 
     @Transactional
-    public void update(String email, String phone, String nickname) {
+    public void update(String email, String tell, String nickname) {
         Users user = userRepository.findByEmail(email);
-        user.setPhone(phone);
+        user.setTell(tell);
         user.setNickname(nickname);
     }
 
