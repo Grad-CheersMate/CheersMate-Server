@@ -1,4 +1,4 @@
-package CheersMate.cheersmate.food.dto;
+package CheersMate.cheersmate.domain.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
@@ -8,7 +8,6 @@ import lombok.Data;
 public class FoodDTO {
     private Long id;
     private String name;
-    private String description;
     private String image;
-    private Long foodCategoryId;
+    private String category;
 }

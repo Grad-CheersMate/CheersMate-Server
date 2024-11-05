@@ -1,10 +1,8 @@
-package CheersMate.cheersmate.food.service;
+package CheersMate.cheersmate.domain.service;
 
-import CheersMate.cheersmate.food.dto.FoodDTO;
-import CheersMate.cheersmate.food.entity.Food;
-import CheersMate.cheersmate.food.entity.FoodCategory;
-import CheersMate.cheersmate.food.repository.FoodCategoryRepository;
-import CheersMate.cheersmate.food.repository.FoodRepository;
+import CheersMate.cheersmate.domain.dto.FoodDTO;
+import CheersMate.cheersmate.domain.entity.Food;
+import CheersMate.cheersmate.domain.repository.FoodRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,7 +15,7 @@ import java.util.stream.Collectors;
 public class FoodService {
 
     private final FoodRepository foodRepository;
-    private final FoodCategoryRepository foodCategoryRepository;
+//    private final FoodCategoryRepository foodCategoryRepository;
 
     // 전체 음식 리스트 조회
     public List<FoodDTO> getAllFoods() {
@@ -25,8 +23,8 @@ public class FoodService {
             FoodDTO dto = new FoodDTO();
             dto.setId(food.getFoodId());
             dto.setName(food.getName());
-            dto.setDescription(food.getDescription());
             dto.setImage(food.getImage());
+            dto.setCategory(food.getCategory());
             return dto;
         }).collect(Collectors.toList());
     }
@@ -40,21 +38,19 @@ public class FoodService {
         FoodDTO dto = new FoodDTO();
         dto.setId(food.getFoodId());
         dto.setName(food.getName());
-        dto.setDescription(food.getDescription());
         dto.setImage(food.getImage());
-
+        dto.setCategory(food.getCategory());
         return dto;
     }
 
     // 카테고리별 음식 조회
-    public List<FoodDTO> getFoodsByCategoryId(Long categoryId) {
-        return foodRepository.findByCategory_FoodcateId(categoryId).stream().map(food -> {
+    public List<FoodDTO> getFoodsByCategory(String categoryName) {
+        return foodRepository.findByCategory(categoryName).stream().map(food -> {
             FoodDTO dto = new FoodDTO();
             dto.setId(food.getFoodId());
             dto.setName(food.getName());
-            dto.setDescription(food.getDescription());
             dto.setImage(food.getImage());
-            dto.setFoodCategoryId(food.getCategory().getFoodcateId());
+            dto.setCategory(food.getCategory());
             return dto;
         }).collect(Collectors.toList());
     }
@@ -62,14 +58,10 @@ public class FoodService {
     // 음식 추가
     @Transactional
     public void addFood(FoodDTO foodDTO) {
-        FoodCategory category = foodCategoryRepository.findById(foodDTO.getFoodCategoryId())
-                .orElseThrow(() -> new IllegalArgumentException("Invalid category ID"));
-
         Food food = new Food();
         food.setName(foodDTO.getName());
-        food.setDescription(foodDTO.getDescription());
         food.setImage(foodDTO.getImage());
-        food.setCategory(category);
+        food.setCategory(foodDTO.getCategory());
 
         foodRepository.save(food);
     }
@@ -80,13 +72,9 @@ public class FoodService {
         Food food = foodRepository.findById(foodId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid food ID"));
 
-        FoodCategory category = foodCategoryRepository.findById(foodDTO.getFoodCategoryId())
-                .orElseThrow(() -> new IllegalArgumentException("Invalid category ID"));
-
         food.setName(foodDTO.getName());
-        food.setDescription(foodDTO.getDescription());
         food.setImage(foodDTO.getImage());
-        food.setCategory(category);
+        food.setCategory(foodDTO.getCategory()); // category는 String 타입
 
         foodRepository.save(food);
     }

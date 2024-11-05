@@ -1,7 +1,7 @@
-package CheersMate.cheersmate.food.controller;
+package CheersMate.cheersmate.domain.controller;
 
-import CheersMate.cheersmate.food.dto.FoodDTO;
-import CheersMate.cheersmate.food.service.FoodService;
+import CheersMate.cheersmate.domain.dto.FoodDTO;
+import CheersMate.cheersmate.domain.service.FoodService;
 import CheersMate.cheersmate.jwt.JwtTokenUtil;
 import CheersMate.cheersmate.users.dto.ApiResponse;
 import CheersMate.cheersmate.users.entity.Role;
@@ -20,7 +20,7 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/admin/food")
+@RequestMapping("/api/admin/food")
 public class FoodController {
     private final FoodService foodService;
     private final JwtTokenUtil jwtTokenUtil;
@@ -51,13 +51,14 @@ public class FoodController {
     }
 
     // 카테고리별 음식 조회
-    @GetMapping("/category/{categoryId}")
-    public ResponseEntity<?> getFoodsByCategory(@RequestHeader("Authorization") String token, @PathVariable("categoryId") Long categoryId) {
+    @GetMapping("/category/{categoryName}")
+    public ResponseEntity<?> getFoodsByCategory(@RequestHeader("Authorization") String token, @PathVariable("categoryName") String categoryName) {
         if (!isAdmin(token)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiResponse(0, 403));
         }
 
-        List<FoodDTO> foods = foodService.getFoodsByCategoryId(categoryId);
+        // `getFoodsByCategoryId` 대신 `getFoodsByCategory` 호출
+        List<FoodDTO> foods = foodService.getFoodsByCategory(categoryName);
         log.info("{\"result\": 1, \"resultCode\": 200, \"foods\": {}}", foods);
         return ResponseEntity.ok(new ApiResponse2(1, 200, foods));
     }

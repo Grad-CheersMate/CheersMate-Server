@@ -1,4 +1,4 @@
-package CheersMate.cheersmate.food.entity;
+package CheersMate.cheersmate.domain.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -12,10 +12,6 @@ public class Food {
     private Long foodId;
 
     private String name;
-    private String description;
     private String image;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "foodcateId")
-    private FoodCategory category;
+    private String category;
 }
