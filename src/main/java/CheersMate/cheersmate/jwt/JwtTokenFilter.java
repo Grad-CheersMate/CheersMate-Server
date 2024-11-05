@@ -38,9 +38,12 @@ public class JwtTokenFilter extends OncePerRequestFilter {
                 path.startsWith("/users/emailFind") ||
                 path.startsWith("/users/passFind") ||
                 path.startsWith("/users/passReset") ||
+                path.startsWith("/auth/") ||
+                path.startsWith("/login/") ||
                 path.startsWith("/swagger-ui/") ||
-                path.startsWith("/v3/api-docs") ||
-                path.startsWith("/weather")) {
+                path.startsWith("/weather") ||
+                path.startsWith("/batch/start")||
+                path.startsWith("/v3/api-docs")) {
             // Skip token validation for these paths
             filterChain.doFilter(request, response);
             return;
