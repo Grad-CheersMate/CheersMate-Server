@@ -5,6 +5,9 @@ import CheersMate.cheersmate.domain.dto.LiquorDTO;
 import CheersMate.cheersmate.domain.entity.Liquor;
 import CheersMate.cheersmate.domain.repository.LiquorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -68,5 +71,10 @@ public class LiquorService {
         liquor.setImageLink(liquorDTO.getImageLink());
         liquor.setCategory(liquorDTO.getCategory());
         return liquor;
+    }
+
+    public Page<LiquorDTO> getLiquorsByCategoryPaged(String category, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return liquorRepository.findByCategory(category, pageable).map(this::convertToDTO);
     }
 }
