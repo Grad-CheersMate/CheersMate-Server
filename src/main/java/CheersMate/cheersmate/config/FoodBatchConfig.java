@@ -7,9 +7,6 @@ import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
-import org.springframework.batch.core.launch.support.SimpleJobLauncher;
-import org.springframework.batch.core.repository.JobRepository;
-import org.springframework.batch.core.repository.support.JobRepositoryFactoryBean;
 import org.springframework.batch.item.database.JpaItemWriter;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper;
@@ -19,46 +16,31 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import javax.sql.DataSource;
-
 @Configuration
-@EnableBatchProcessing
 public class FoodBatchConfig {
+    @Autowired
+    private JobBuilderFactory jobBuilderFactory;
+
+    @Autowired
+    private StepBuilderFactory stepBuilderFactory;
+
+    @Autowired
+    private PlatformTransactionManager transactionManager;
+
     @Autowired
     private EntityManagerFactory entityManagerFactory;
 
-    @Autowired
-    private DataSource dataSource;
-
     @Bean
-    public JobRepository jobRepository() throws Exception {
-        JobRepositoryFactoryBean factory = new JobRepositoryFactoryBean();
-        factory.setDataSource(dataSource);
-        factory.setTransactionManager(transactionManager());
-        factory.afterPropertiesSet();
-        return factory.getObject();
-    }
-
-    @Bean
-    public SimpleJobLauncher jobLauncher() throws Exception {
-        SimpleJobLauncher jobLauncher = new SimpleJobLauncher();
-        jobLauncher.setJobRepository(jobRepository());
-        jobLauncher.afterPropertiesSet();
-        return jobLauncher;
-    }
-
-    @Bean
-    public FlatFileItemReader<Food> reader() {
+    public FlatFileItemReader<Food> foodReader() {
         FlatFileItemReader<Food> reader = new FlatFileItemReader<>();
         reader.setResource(new ClassPathResource("food_images.csv"));
-        reader.setLinesToSkip(1); // 첫 번째 줄 건너뛰기
-        reader.setEncoding("UTF-8"); // 파일 인코딩을 UTF-8로 설정
+        reader.setLinesToSkip(1);
+        reader.setEncoding("UTF-8");
         reader.setLineMapper(new DefaultLineMapper<Food>() {{
             setLineTokenizer(new DelimitedLineTokenizer() {{
-                setNames("category", "name", "image"); // 필드 매핑 수정
+                setNames("category", "name", "image");
             }});
             setFieldSetMapper(new BeanWrapperFieldSetMapper<>() {{
                 setTargetType(Food.class);
@@ -68,41 +50,26 @@ public class FoodBatchConfig {
     }
 
     @Bean
-    public JpaItemWriter<Food> writer() {
+    public JpaItemWriter<Food> foodWriter() {
         JpaItemWriter<Food> writer = new JpaItemWriter<>();
         writer.setEntityManagerFactory(entityManagerFactory);
         return writer;
     }
 
     @Bean
-    public PlatformTransactionManager transactionManager() {
-        return new JpaTransactionManager(entityManagerFactory);
-    }
-
-    @Bean
-    public JobBuilderFactory jobBuilderFactory() throws Exception {
-        return new JobBuilderFactory(jobRepository());
-    }
-
-    @Bean
-    public StepBuilderFactory stepBuilderFactory() throws Exception {
-        return new StepBuilderFactory(jobRepository());
-    }
-
-    @Bean
-    public Job importFoodJob() throws Exception {
-        return jobBuilderFactory().get("importFoodJob")
-                .start(step1())
+    public Job importFoodJob() {
+        return jobBuilderFactory.get("importFoodJob")
+                .start(foodStep())
                 .build();
     }
 
     @Bean
-    public Step step1() throws Exception {
-        return stepBuilderFactory().get("step1")
+    public Step foodStep() {
+        return stepBuilderFactory.get("foodStep")
                 .<Food, Food>chunk(10)
-                .reader(reader())
-                .writer(writer())
-                .transactionManager(transactionManager())
+                .reader(foodReader())
+                .writer(foodWriter())
+                .transactionManager(transactionManager)
                 .build();
     }
 }
