@@ -15,12 +15,14 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling // 스케줄링 활성화
 @EnableBatchProcessing // 배치 처리 활성화
 public class CheersmateApplication {
-
 	@Autowired
 	private JobLauncher jobLauncher;
 
 	@Autowired
 	private Job importLiquorJob;
+
+	@Autowired
+	private Job importFoodJob;
 
 	public static void main(String[] args) {
 		SpringApplication.run(CheersmateApplication.class, args);
@@ -30,6 +32,7 @@ public class CheersmateApplication {
 	public CommandLineRunner run() {
 		return args -> {
 			jobLauncher.run(importLiquorJob, new JobParameters());
+			jobLauncher.run(importFoodJob, new JobParameters());
 		};
 	}
 

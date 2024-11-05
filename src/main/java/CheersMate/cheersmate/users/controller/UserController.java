@@ -54,7 +54,7 @@ public class UserController {
             newUser.setNickname(request.getNickname());
             newUser.setPassword(encodedPassword);
             newUser.setEmail(request.getEmail());
-            newUser.setPhone(request.getPhone());
+            newUser.setTell(request.getTell());
             newUser.setRole(Role.USER);
 
             userService.saveUser(newUser);
@@ -73,7 +73,7 @@ public class UserController {
     @PostMapping("/emailFind")
     public ResponseEntity<?> emailFind(@RequestBody UserDTO request) {
         try {
-            Users user = userService.findEmail(request.getPhone(), request.getNickname());
+            Users user = userService.findEmail(request.getTell(), request.getNickname());
 
             if (user == null) {
                 log.info("{\"result\": 0, \"resultCode\": 404}");
@@ -91,7 +91,7 @@ public class UserController {
     @PostMapping("/passFind")
     public ResponseEntity<?> passFind(@RequestBody UserDTO request) {
         try {
-            Users user = userService.findPass(request.getEmail(), request.getPhone());
+            Users user = userService.findPass(request.getEmail(), request.getTell());
 
             if (user == null) {
                 log.info("{\"result\": 0, \"resultCode\": 404}");
@@ -137,7 +137,7 @@ public class UserController {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponse(0,404));
             }
 
-            userService.update(userEmail, request.getPhone(), request.getNickname());
+            userService.update(userEmail, request.getTell(), request.getNickname());
             log.info("{\"result\": 1, \"resultCode\": 200}");
             return ResponseEntity.ok(new ApiResponse(1,200));
         } catch (Exception e) {

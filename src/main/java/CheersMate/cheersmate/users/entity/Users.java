@@ -28,9 +28,9 @@ public class Users {
     @Pattern(regexp = "^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])+[.][a-zA-Z]{2,3}$", message = "이메일 주소 양식을 확인해주세요")
     private String email;
 
-    @Column(name = "Phone", nullable = false)
-    @NotEmpty(message = "Phone is required")
-    private String phone;
+    @Column(name = "Tell", nullable = false)
+    @NotEmpty(message = "Tell is required")
+    private String tell;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "Role", nullable = false)
