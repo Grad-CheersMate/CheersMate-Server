@@ -98,8 +98,11 @@ public class UserController {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse(0,404));
             }
 
-            log.info("{\"result\": 1, \"resultCode\": 200, \"email\": \"{}\"}", user.getEmail());
-            return ResponseEntity.ok(new ApiResponse(1,200,user.getEmail()));
+            String tempPassword = userService.generateTempPassword();
+            userService.changePassword(user.getEmail(), tempPassword);
+
+            log.info("{\"result\": 1, \"resultCode\": 200, \"email\": \"{}\"}", tempPassword);
+            return ResponseEntity.ok(new ApiResponse3(1,200,tempPassword));
         } catch (Exception e) {
             log.error("Error during password find", e);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponse(0,600));
@@ -116,7 +119,13 @@ public class UserController {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse(0,404));
             }
 
-            userService.changePassword(user.getEmail(), request.getPassword());
+            // 현재 비밀번호 검증
+            if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+                log.info("{\"result\": 0, \"resultCode\": 401, \"message\": \"Invalid current password\"}");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponse2(0, 401, "Invalid current password"));
+            }
+
+            userService.changePassword(user.getEmail(), request.getNewPassword());
             log.info("{\"result\": 1, \"resultCode\": 200}");
             return ResponseEntity.ok(new ApiResponse(1,200));
         }catch (Exception e) {
@@ -178,6 +187,20 @@ public class UserController {
             this.result = result;
             this.resultCode = resultCode;
             this.message = message;
+        }
+    }
+
+    @Getter
+    @NoArgsConstructor
+    public static class ApiResponse3 {
+        private int result;
+        private int resultCode;
+        private String tempPass;
+
+        public ApiResponse3(int result, int resultCode, String tempPass) {
+            this.result = result;
+            this.resultCode = resultCode;
+            this.tempPass = tempPass;
         }
     }
 }
