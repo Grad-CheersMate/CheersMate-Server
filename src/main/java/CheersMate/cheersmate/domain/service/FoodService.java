@@ -22,7 +22,7 @@ public class FoodService {
             FoodDTO dto = new FoodDTO();
             dto.setId(food.getFoodId());
             dto.setName(food.getName());
-            dto.setImage(food.getImage());
+            dto.setImageLink(food.getImageLink());
             dto.setCategory(food.getCategory());
             return dto;
         }).collect(Collectors.toList());
@@ -37,7 +37,7 @@ public class FoodService {
         FoodDTO dto = new FoodDTO();
         dto.setId(food.getFoodId());
         dto.setName(food.getName());
-        dto.setImage(food.getImage());
+        dto.setImageLink(food.getImageLink());
         dto.setCategory(food.getCategory());
         return dto;
     }
@@ -48,7 +48,7 @@ public class FoodService {
             FoodDTO dto = new FoodDTO();
             dto.setId(food.getFoodId());
             dto.setName(food.getName());
-            dto.setImage(food.getImage());
+            dto.setImageLink(food.getImageLink());
             dto.setCategory(food.getCategory());
             return dto;
         }).collect(Collectors.toList());
@@ -59,7 +59,7 @@ public class FoodService {
     public void addFood(FoodDTO foodDTO) {
         Food food = new Food();
         food.setName(foodDTO.getName());
-        food.setImage(foodDTO.getImage());
+        food.setImageLink(foodDTO.getImageLink());
         food.setCategory(foodDTO.getCategory());
 
         foodRepository.save(food);
@@ -72,7 +72,7 @@ public class FoodService {
                 .orElseThrow(() -> new IllegalArgumentException("Invalid food ID"));
 
         food.setName(foodDTO.getName());
-        food.setImage(foodDTO.getImage());
+        food.setImageLink(foodDTO.getImageLink());
         food.setCategory(foodDTO.getCategory()); // category는 String 타입
 
         foodRepository.save(food);
