@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 public class FoodService {
 
     private final FoodRepository foodRepository;
-//    private final FoodCategoryRepository foodCategoryRepository;
 
     // 전체 음식 리스트 조회
     public List<FoodDTO> getAllFoods() {
