@@ -5,7 +5,7 @@ public class RecommendationRequest {
     private int mood;
     private int companion;
 
-
+    // Getters and Setters
     public int getMood() {
         return mood;
     }

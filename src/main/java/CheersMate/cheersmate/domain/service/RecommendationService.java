@@ -8,12 +8,12 @@ import CheersMate.cheersmate.domain.entity.Feedback;
 import CheersMate.cheersmate.domain.repository.FeedbackRepository;
 import CheersMate.cheersmate.weather.entity.WeatherData;
 import CheersMate.cheersmate.weather.repository.WeatherDataRepository;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
+import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+
+import java.nio.charset.StandardCharsets;
 
 @Service
 public class RecommendationService {
@@ -22,13 +22,17 @@ public class RecommendationService {
     private final FeedbackRepository feedbackRepository;
     private final WeatherDataRepository weatherDataRepository;
 
-    // Flask 서버의 로컬 URL로 변경
-    private final String FLASK_SERVER_URL = "http://127.0.0.1:5001";
+    // Flask 서버 AWS로 설정
+    private final String FLASK_SERVER_URL = "http://15.165.220.173:5001";
 
     public RecommendationService(RestTemplate restTemplate, FeedbackRepository feedbackRepository, WeatherDataRepository weatherDataRepository) {
         this.restTemplate = restTemplate;
         this.feedbackRepository = feedbackRepository;
         this.weatherDataRepository = weatherDataRepository;
+
+        // RestTemplate에 UTF-8 인코딩 설정 추가
+        this.restTemplate.getMessageConverters()
+                .add(0, new StringHttpMessageConverter(StandardCharsets.UTF_8));
     }
 
     public RecommendationResponse getRecommendation(RecommendationRequest request) {
@@ -52,14 +56,33 @@ public class RecommendationService {
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         HttpEntity<RecommendationRequestWithCondition> httpEntity = new HttpEntity<>(flaskRequest, headers);
-        ResponseEntity<RecommendationResponse> response = restTemplate.postForEntity(url, httpEntity, RecommendationResponse.class);
+        ResponseEntity<RecommendationResponse> response = restTemplate.exchange(
+                url,
+                HttpMethod.POST,
+                httpEntity,
+                RecommendationResponse.class
+        );
+
+        if (response.getBody() == null || !response.getBody().isResult()) {
+            String errorMessage = response.getBody() != null ? response.getBody().getError() : "Flask 서버로부터 응답을 받지 못했습니다.";
+            throw new RuntimeException(errorMessage);
+        }
 
         return response.getBody();
     }
 
     public void saveFeedback(FeedbackRequest feedbackRequest) {
+        // 최신 날씨 데이터 가져오기
+        WeatherData latestWeatherData = weatherDataRepository.findTopByOrderByWeatherDateDescWeatherTimeDesc();
+        if (latestWeatherData == null) {
+            throw new RuntimeException("날씨 데이터가 없습니다.");
+        }
+
+        // 날씨 상태를 weatherCondition(int) 값으로 변환
+        int weatherCondition = mapWeatherConditionToInt(latestWeatherData.getWeatherCondition());
+
         Feedback feedback = new Feedback(
-                feedbackRequest.getWeatherCondition(),
+                weatherCondition,
                 feedbackRequest.getMood(),
                 feedbackRequest.getCompanion(),
                 feedbackRequest.getRecommendedLiquor(),
@@ -72,7 +95,7 @@ public class RecommendationService {
 
     // WeatherCondition을 condition(int)로 매핑하는 메서드
     private int mapWeatherConditionToInt(String weatherCondition) {
-        // weatherCondition에 따라 적절한 int 값을 반환하도록 매핑합니다.
+        // weatherCondition에 따라 적절한 int 값을 반환하도록 매핑
         switch (weatherCondition) {
             case "맑음":
                 return 0;
@@ -89,7 +112,7 @@ public class RecommendationService {
             case "추운 날":
                 return 6;
             default:
-                return 0; // 기본값으로 맑음
+                return 0; // 기본값 설정
         }
     }
 }

@@ -3,7 +3,7 @@ package CheersMate.cheersmate.domain.controller;
 import CheersMate.cheersmate.domain.dto.FoodDTO;
 import CheersMate.cheersmate.domain.service.FoodService;
 import CheersMate.cheersmate.jwt.JwtTokenUtil;
-import CheersMate.cheersmate.users.dto.ApiResponse;
+import CheersMate.cheersmate.response.ApiResponse;
 import CheersMate.cheersmate.users.entity.Role;
 import CheersMate.cheersmate.users.entity.Users;
 import CheersMate.cheersmate.users.service.UserService;

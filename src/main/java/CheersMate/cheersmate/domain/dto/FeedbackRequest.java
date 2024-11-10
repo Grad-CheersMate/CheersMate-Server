@@ -2,7 +2,6 @@ package CheersMate.cheersmate.domain.dto;
 
 public class FeedbackRequest {
 
-    private int weatherCondition;
     private int mood;
     private int companion;
 
@@ -11,14 +10,6 @@ public class FeedbackRequest {
     private double alcoholContent;
     private int rating;
 
-    // Getters and Setters
-    public int getWeatherCondition() {
-        return weatherCondition;
-    }
-
-    public void setWeatherCondition(int weatherCondition) {
-        this.weatherCondition = weatherCondition;
-    }
 
     public int getMood() {
         return mood;
