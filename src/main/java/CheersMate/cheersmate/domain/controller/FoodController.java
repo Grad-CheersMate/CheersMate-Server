@@ -6,9 +6,6 @@ import CheersMate.cheersmate.jwt.JwtTokenUtil;
 import CheersMate.cheersmate.response.ApiResponse;
 import CheersMate.cheersmate.response.ErrorResponse;
 import CheersMate.cheersmate.response.FoodResponse;
-import CheersMate.cheersmate.users.entity.Role;
-import CheersMate.cheersmate.users.entity.Users;
-import CheersMate.cheersmate.users.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -24,14 +21,14 @@ import java.util.List;
 public class FoodController {
     private final FoodService foodService;
     private final JwtTokenUtil jwtTokenUtil;
-    private final UserService userService;
 
     // 음식 조회
     @GetMapping
     public ResponseEntity<?> getAllFoods(@RequestHeader("Authorization") String token) {
         if (!isAdmin(token)) {
-            log.info("{\"result\": 0, \"httpCode\": 403}");
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiResponse(false, 403));
+            String message = "Access denied: User does not have admin privileges.";
+            log.info("{\"result\": 0, \"httpCode\": 403, \"message\": \"{}\"}", message);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ErrorResponse(false, 403, message));
         }
 
         List<FoodDTO> foods = foodService.getAllFoods();
@@ -43,8 +40,9 @@ public class FoodController {
     @GetMapping("/{foodId}")
     public ResponseEntity<?> getFoods(@RequestHeader("Authorization") String token, @PathVariable("foodId") Long foodId) {
         if (!isAdmin(token)) {
-            log.info("{\"result\": 0, \"httpCode\": 403}");
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiResponse(false, 403));
+            String message = "Access denied: User does not have admin privileges.";
+            log.info("{\"result\": 0, \"httpCode\": 403, \"message\": \"{}\"}", message);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ErrorResponse(false, 403, message));
         }
 
         FoodDTO food = foodService.getFoodById(foodId);
@@ -56,8 +54,9 @@ public class FoodController {
     @GetMapping("/category/{categoryName}")
     public ResponseEntity<?> getFoodsByCategory(@RequestHeader("Authorization") String token, @PathVariable("categoryName") String categoryName) {
         if (!isAdmin(token)) {
-            log.info("{\"result\": 0, \"httpCode\": 403}");
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiResponse(false, 403));
+            String message = "Access denied: User does not have admin privileges.";
+            log.info("{\"result\": 0, \"httpCode\": 403, \"message\": \"{}\"}", message);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ErrorResponse(false, 403, message));
         }
 
         List<FoodDTO> foods = foodService.getFoodsByCategory(categoryName);
@@ -77,8 +76,9 @@ public class FoodController {
     @PostMapping
     public ResponseEntity<?> addFood(@RequestHeader("Authorization") String token, @RequestBody FoodDTO foodDTO) {
         if (!isAdmin(token)) {
-            log.info("{\"result\": 0, \"httpCode\": 403}");
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiResponse(false, 403));
+            String message = "Access denied: User does not have admin privileges.";
+            log.info("{\"result\": 0, \"httpCode\": 403, \"message\": \"{}\"}", message);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ErrorResponse(false, 403, message));
         }
 
         foodService.addFood(foodDTO);
@@ -90,8 +90,9 @@ public class FoodController {
     @PutMapping("/{foodId}")
     public ResponseEntity<?> updateFood(@RequestHeader("Authorization") String token, @PathVariable("foodId") Long foodId, @RequestBody FoodDTO foodDTO) {
         if (!isAdmin(token)) {
-            log.info("{\"result\": 0, \"httpCode\": 403}");
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiResponse(false, 403));
+            String message = "Access denied: User does not have admin privileges.";
+            log.info("{\"result\": 0, \"httpCode\": 403, \"message\": \"{}\"}", message);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ErrorResponse(false, 403, message));
         }
 
         foodService.updateFood(foodId, foodDTO);
@@ -103,8 +104,9 @@ public class FoodController {
     @DeleteMapping("/{foodId}")
     public ResponseEntity<?> deleteFood(@RequestHeader("Authorization") String token, @PathVariable("foodId") Long foodId) {
         if (!isAdmin(token)) {
-            log.info("{\"result\": 0, \"httpCode\": 403}");
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiResponse(false, 403));
+            String message = "Access denied: User does not have admin privileges.";
+            log.info("{\"result\": 0, \"httpCode\": 403, \"message\": \"{}\"}", message);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ErrorResponse(false, 403, message));
         }
 
         foodService.deleteFood(foodId);
@@ -114,9 +116,7 @@ public class FoodController {
 
     // 관리자 인증 메서드
     private boolean isAdmin(String token) {
-        token = token.substring(7);
-        String userEmail = jwtTokenUtil.extractUsername(token);
-        Users user = userService.findUserByEmail(userEmail);
-        return user != null && user.getRole() == Role.ADMIN;
+        String role = jwtTokenUtil.extractRole(token.substring(7));
+        return "ADMIN".equals(role);
     }
 }
