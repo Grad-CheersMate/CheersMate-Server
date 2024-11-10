@@ -29,6 +29,7 @@ public class FoodController {
     @GetMapping
     public ResponseEntity<?> getAllFoods(@RequestHeader("Authorization") String token) {
         if (!isAdmin(token)) {
+            log.info("{\"result\": 0, \"httpCode\": 403}");
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiResponse(false, 403));
         }
 
@@ -41,6 +42,7 @@ public class FoodController {
     @GetMapping("/{foodId}")
     public ResponseEntity<?> getFoods(@RequestHeader("Authorization") String token, @PathVariable("foodId") Long foodId) {
         if (!isAdmin(token)) {
+            log.info("{\"result\": 0, \"httpCode\": 403}");
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiResponse(false, 403));
         }
 
@@ -53,6 +55,7 @@ public class FoodController {
     @GetMapping("/category/{categoryName}")
     public ResponseEntity<?> getFoodsByCategory(@RequestHeader("Authorization") String token, @PathVariable("categoryName") String categoryName) {
         if (!isAdmin(token)) {
+            log.info("{\"result\": 0, \"httpCode\": 403}");
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiResponse(false, 403));
         }
 
@@ -66,6 +69,7 @@ public class FoodController {
     @PostMapping
     public ResponseEntity<?> addFood(@RequestHeader("Authorization") String token, @RequestBody FoodDTO foodDTO) {
         if (!isAdmin(token)) {
+            log.info("{\"result\": 0, \"httpCode\": 403}");
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiResponse(false, 403));
         }
 
@@ -78,6 +82,7 @@ public class FoodController {
     @PutMapping("/{foodId}")
     public ResponseEntity<?> updateFood(@RequestHeader("Authorization") String token, @PathVariable("foodId") Long foodId, @RequestBody FoodDTO foodDTO) {
         if (!isAdmin(token)) {
+            log.info("{\"result\": 0, \"httpCode\": 403}");
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiResponse(false, 403));
         }
 
@@ -90,6 +95,7 @@ public class FoodController {
     @DeleteMapping("/{foodId}")
     public ResponseEntity<?> deleteFood(@RequestHeader("Authorization") String token, @PathVariable("foodId") Long foodId) {
         if (!isAdmin(token)) {
+            log.info("{\"result\": 0, \"httpCode\": 403}");
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiResponse(false, 403));
         }
 
