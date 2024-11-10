@@ -1,4 +1,4 @@
-package CheersMate.cheersmate.users.dto;
+package CheersMate.cheersmate.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;

@@ -2,7 +2,7 @@ package CheersMate.cheersmate.users.controller;
 
 import CheersMate.cheersmate.exception.CustomValidationException;
 import CheersMate.cheersmate.jwt.JwtTokenUtil;
-import CheersMate.cheersmate.users.dto.ApiResponse;
+import CheersMate.cheersmate.response.ApiResponse;
 import CheersMate.cheersmate.users.dto.ChangePasswordDTO;
 import CheersMate.cheersmate.users.dto.LoginDTO;
 import CheersMate.cheersmate.users.dto.UserDTO;
