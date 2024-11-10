@@ -5,6 +5,7 @@ import CheersMate.cheersmate.domain.dto.LiquorDTO;
 import CheersMate.cheersmate.domain.service.LiquorService;
 import CheersMate.cheersmate.jwt.JwtTokenUtil;
 import CheersMate.cheersmate.response.ApiResponse;
+import CheersMate.cheersmate.response.ErrorResponse;
 import CheersMate.cheersmate.response.LiquorResponse;
 import CheersMate.cheersmate.users.entity.Role;
 import CheersMate.cheersmate.users.entity.Users;
@@ -33,6 +34,13 @@ public class LiquorController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "30") int size) {
         Page<LiquorDTO> liquorsByCategoryPaged = liquorService.getLiquorsByCategoryPaged(category, page, size);
+
+        if (liquorsByCategoryPaged.isEmpty()) {
+            log.info("{\"result\": 0, \"httpCode\": 404, \"message\": \"Category not found or no liquors in this category\"}");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ErrorResponse(false, 404, "Category not found or no liquors in this category"));
+        }
+
         log.info("{\"result\": 1, \"httpCode\": 200, \"liquors\": {}}", liquorsByCategoryPaged);
         return ResponseEntity.ok(new LiquorResponse(true, 200, liquorsByCategoryPaged));
     }

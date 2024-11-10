@@ -4,6 +4,7 @@ import CheersMate.cheersmate.domain.dto.FoodDTO;
 import CheersMate.cheersmate.domain.service.FoodService;
 import CheersMate.cheersmate.jwt.JwtTokenUtil;
 import CheersMate.cheersmate.response.ApiResponse;
+import CheersMate.cheersmate.response.ErrorResponse;
 import CheersMate.cheersmate.response.FoodResponse;
 import CheersMate.cheersmate.users.entity.Role;
 import CheersMate.cheersmate.users.entity.Users;
@@ -59,8 +60,15 @@ public class FoodController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiResponse(false, 403));
         }
 
-        // `getFoodsByCategoryId` 대신 `getFoodsByCategory` 호출
         List<FoodDTO> foods = foodService.getFoodsByCategory(categoryName);
+
+        // 음식 목록이 비어 있는 경우 404 에러 응답
+        if (foods.isEmpty()) {
+            log.info("{\"result\": 0, \"httpCode\": 404, \"message\": \"Category not found or no foods in this category\"}");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ErrorResponse(false, 404, "Category not found or no foods in this category"));
+        }
+
         log.info("{\"result\": 1, \"httpCode\": 200, \"foods\": {}}", foods);
         return ResponseEntity.ok(new FoodResponse(true, 200, foods));
     }
