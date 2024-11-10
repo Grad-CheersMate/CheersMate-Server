@@ -12,6 +12,7 @@ public class Food {
     private Long foodId;
 
     private String name;
-    private String image;
+    @Column(length = 1000)
+    private String imageLink;
     private String category;
 }

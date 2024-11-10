@@ -8,26 +8,19 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ApiResponse {
-    private int result;
-    private int resultCode;
-    private String email;
+    private boolean result;
+    private int httpCode;
     private String accessToken;
     private String refreshToken;
 
-    public ApiResponse(int result, int resultCode) {
+    public ApiResponse(boolean result, int httpCode) {
         this.result = result;
-        this.resultCode = resultCode;
+        this.httpCode = httpCode;
     }
 
-    public ApiResponse(int result, int resultCode, String email) {
+    public ApiResponse(boolean result, int httpCode, String accessToken, String refreshToken) {
         this.result = result;
-        this.resultCode = resultCode;
-        this.email = email;
-    }
-
-    public ApiResponse(int result, int resultCode, String accessToken, String refreshToken) {
-        this.result = result;
-        this.resultCode = resultCode;
+        this.httpCode = httpCode;
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
     }

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
@@ -85,5 +86,17 @@ public class UserService {
     public void changePassword(String email, String newPassword) {
         Users user = userRepository.findByEmail(email);
         user.setPassword(passwordEncoder.encode(newPassword));
+    }
+
+    @Transactional
+    public String generateTempPassword() {
+        int length = 8;  // 임시 비밀번호 길이
+        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        StringBuilder password = new StringBuilder();
+        Random random = new Random();
+        for (int i = 0; i < length; i++) {
+            password.append(chars.charAt(random.nextInt(chars.length())));
+        }
+        return password.toString();
     }
 }
