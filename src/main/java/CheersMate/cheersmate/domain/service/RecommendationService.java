@@ -1,11 +1,10 @@
 package CheersMate.cheersmate.domain.service;
 
-import CheersMate.cheersmate.domain.dto.FeedbackRequest;
-import CheersMate.cheersmate.domain.dto.RecommendationRequest;
-import CheersMate.cheersmate.domain.dto.RecommendationRequestWithCondition;
-import CheersMate.cheersmate.domain.dto.RecommendationResponse;
+import CheersMate.cheersmate.domain.dto.*;
 import CheersMate.cheersmate.domain.entity.Feedback;
+import CheersMate.cheersmate.domain.entity.Liquor;
 import CheersMate.cheersmate.domain.repository.FeedbackRepository;
+import CheersMate.cheersmate.domain.repository.LiquorRepository;
 import CheersMate.cheersmate.weather.entity.WeatherData;
 import CheersMate.cheersmate.weather.repository.WeatherDataRepository;
 import org.springframework.http.*;
@@ -14,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 
 @Service
 public class RecommendationService {
@@ -21,14 +21,16 @@ public class RecommendationService {
     private final RestTemplate restTemplate;
     private final FeedbackRepository feedbackRepository;
     private final WeatherDataRepository weatherDataRepository;
+    private final LiquorRepository liquorRepository;
 
     // Flask 서버 AWS로 설정
     private final String FLASK_SERVER_URL = "http://15.165.220.173:5001";
 
-    public RecommendationService(RestTemplate restTemplate, FeedbackRepository feedbackRepository, WeatherDataRepository weatherDataRepository) {
+    public RecommendationService(RestTemplate restTemplate, FeedbackRepository feedbackRepository, WeatherDataRepository weatherDataRepository, LiquorRepository liquorRepository) {
         this.restTemplate = restTemplate;
         this.feedbackRepository = feedbackRepository;
         this.weatherDataRepository = weatherDataRepository;
+        this.liquorRepository = liquorRepository;
 
         // RestTemplate에 UTF-8 인코딩 설정 추가
         this.restTemplate.getMessageConverters()
@@ -81,15 +83,22 @@ public class RecommendationService {
         // 날씨 상태를 weatherCondition(int) 값으로 변환
         int weatherCondition = mapWeatherConditionToInt(latestWeatherData.getWeatherCondition());
 
+        // Liquor 이름으로 Liquor 엔티티 조회
+        Optional<Liquor> optionalLiquor = liquorRepository.findByName(feedbackRequest.getLiquor().getName());
+        if (!optionalLiquor.isPresent()) {
+            throw new RuntimeException("주류 '" + feedbackRequest.getLiquor().getName() + "'를 찾을 수 없습니다.");
+        }
+        Liquor liquor = optionalLiquor.get();
+
+        // Feedback 생성 및 저장
         Feedback feedback = new Feedback(
                 weatherCondition,
-                feedbackRequest.getMood(),
+                feedbackRequest.getEmotion(),
                 feedbackRequest.getCompanion(),
-                feedbackRequest.getRecommendedLiquor(),
-                feedbackRequest.getDrinkType(),
-                feedbackRequest.getAlcoholContent(),
+                liquor,  // Liquor 객체 자체를 참조
                 feedbackRequest.getRating()
         );
+
         feedbackRepository.save(feedback);
     }
 

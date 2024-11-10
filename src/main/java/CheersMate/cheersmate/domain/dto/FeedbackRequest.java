@@ -2,21 +2,18 @@ package CheersMate.cheersmate.domain.dto;
 
 public class FeedbackRequest {
 
-    private int mood;
+    private int emotion;
     private int companion;
-
-    private String recommendedLiquor;
-    private String drinkType;
-    private double alcoholContent;
+    private LiquorName liquor; // 주류 이름을 객체로 받음
     private int rating;
 
-
-    public int getMood() {
-        return mood;
+    // Getters and Setters
+    public int getEmotion() {
+        return emotion;
     }
 
-    public void setMood(int mood) {
-        this.mood = mood;
+    public void setEmotion(int emotion) {
+        this.emotion = emotion;
     }
 
     public int getCompanion() {
@@ -27,28 +24,12 @@ public class FeedbackRequest {
         this.companion = companion;
     }
 
-    public String getRecommendedLiquor() {
-        return recommendedLiquor;
+    public LiquorName getLiquor() {
+        return liquor;
     }
 
-    public void setRecommendedLiquor(String recommendedLiquor) {
-        this.recommendedLiquor = recommendedLiquor;
-    }
-
-    public String getDrinkType() {
-        return drinkType;
-    }
-
-    public void setDrinkType(String drinkType) {
-        this.drinkType = drinkType;
-    }
-
-    public double getAlcoholContent() {
-        return alcoholContent;
-    }
-
-    public void setAlcoholContent(double alcoholContent) {
-        this.alcoholContent = alcoholContent;
+    public void setLiquor(LiquorName liquor) {
+        this.liquor = liquor;
     }
 
     public int getRating() {
@@ -57,5 +38,18 @@ public class FeedbackRequest {
 
     public void setRating(int rating) {
         this.rating = rating;
+    }
+
+    public static class LiquorName {
+        private String name;
+
+        // Getters and Setters
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
     }
 }
