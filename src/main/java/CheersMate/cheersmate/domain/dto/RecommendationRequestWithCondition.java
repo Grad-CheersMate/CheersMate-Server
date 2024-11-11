@@ -3,7 +3,7 @@ package CheersMate.cheersmate.domain.dto;
 public class RecommendationRequestWithCondition {
 
     private int condition;
-    private int mood;
+    private int emotion;
     private int companion;
 
     // Getters and Setters
@@ -15,12 +15,12 @@ public class RecommendationRequestWithCondition {
         this.condition = condition;
     }
 
-    public int getMood() {
-        return mood;
+    public int getEmotion() {
+        return emotion;
     }
 
-    public void setMood(int mood) {
-        this.mood = mood;
+    public void setEmotion(int emotion) {
+        this.emotion = emotion;
     }
 
     public int getCompanion() {

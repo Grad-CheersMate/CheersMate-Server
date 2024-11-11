@@ -1,15 +1,13 @@
 package CheersMate.cheersmate.domain.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
-import java.util.Map;
 
 public class RecommendationResponse {
 
     private boolean result;
     private int httpCode;
     private Data data;
-    private String error; // 에러 메시지 처리
+    private String error;
 
     // Getters and Setters
     public boolean isResult() {
@@ -44,51 +42,50 @@ public class RecommendationResponse {
         this.error = error;
     }
 
-    // 내부 클래스 정의
+    // Data 클래스
     public static class Data {
-        @JsonProperty("현재 상태")
-        private CurrentState currentState;
-
-        @JsonProperty("추천된 주류")
-        private RecommendedLiquor recommendedLiquor;
-
-        @JsonProperty("유사 주류")
-        private List<SimilarLiquor> similarLiquors;
+        private Request request;
+        private Recommend recommend; // Recommend 타입으로 변경하여 사용
+        private Food food; // 별도의 Food 필드 추가
+        private List<SimilarItem> similar;
 
         // Getters and Setters
-        public CurrentState getCurrentState() {
-            return currentState;
+        public Request getRequest() {
+            return request;
         }
 
-        public void setCurrentState(CurrentState currentState) {
-            this.currentState = currentState;
+        public void setRequest(Request request) {
+            this.request = request;
         }
 
-        public RecommendedLiquor getRecommendedLiquor() {
-            return recommendedLiquor;
+        public Recommend getRecommend() {
+            return recommend;
         }
 
-        public void setRecommendedLiquor(RecommendedLiquor recommendedLiquor) {
-            this.recommendedLiquor = recommendedLiquor;
+        public void setRecommend(Recommend recommend) {
+            this.recommend = recommend;
         }
 
-        public List<SimilarLiquor> getSimilarLiquors() {
-            return similarLiquors;
+        public Food getFood() {
+            return food;
         }
 
-        public void setSimilarLiquors(List<SimilarLiquor> similarLiquors) {
-            this.similarLiquors = similarLiquors;
+        public void setFood(Food food) {
+            this.food = food;
+        }
+
+        public List<SimilarItem> getSimilar() {
+            return similar;
+        }
+
+        public void setSimilar(List<SimilarItem> similar) {
+            this.similar = similar;
         }
     }
 
-    public static class CurrentState {
-        @JsonProperty("날씨")
+    public static class Request {
         private String weather;
-
-        @JsonProperty("기분")
-        private String mood;
-
-        @JsonProperty("동반자")
+        private String emotion;
         private String companion;
 
         // Getters and Setters
@@ -100,12 +97,12 @@ public class RecommendationResponse {
             this.weather = weather;
         }
 
-        public String getMood() {
-            return mood;
+        public String getEmotion() {
+            return emotion;
         }
 
-        public void setMood(String mood) {
-            this.mood = mood;
+        public void setEmotion(String emotion) {
+            this.emotion = emotion;
         }
 
         public String getCompanion() {
@@ -117,24 +114,11 @@ public class RecommendationResponse {
         }
     }
 
-    public static class RecommendedLiquor {
-        @JsonProperty("이름")
+    public static class Recommend { // liquor와 food 필드를 Recommend 클래스로 통합
         private String name;
-
-        @JsonProperty("주종")
-        private String category;
-
-        @JsonProperty("도수")
-        private double alcoholContent;
-
-        @JsonProperty("이미지 링크")
-        private String imageLink;
-
-        @JsonProperty("음식")
-        private String food;
-
-        @JsonProperty("음식 이미지 링크")
-        private String foodImageLink;
+        private double volume;
+        private String type;
+        private String imageUrl;
 
         // Getters and Setters
         public String getName() {
@@ -145,50 +129,34 @@ public class RecommendationResponse {
             this.name = name;
         }
 
-        public String getCategory() {
-            return category;
+        public double getVolume() {
+            return volume;
         }
 
-        public void setCategory(String category) {
-            this.category = category;
+        public void setVolume(double volume) {
+            this.volume = volume;
         }
 
-        public double getAlcoholContent() {
-            return alcoholContent;
+        public String getType() {
+            return type;
         }
 
-        public void setAlcoholContent(double alcoholContent) {
-            this.alcoholContent = alcoholContent;
+        public void setType(String type) {
+            this.type = type;
         }
 
-        public String getImageLink() {
-            return imageLink;
+        public String getImageUrl() {
+            return imageUrl;
         }
 
-        public void setImageLink(String imageLink) {
-            this.imageLink = imageLink;
-        }
-
-        public String getFood() {
-            return food;
-        }
-
-        public void setFood(String food) {
-            this.food = food;
-        }
-
-        public String getFoodImageLink() {
-            return foodImageLink;
-        }
-
-        public void setFoodImageLink(String foodImageLink) {
-            this.foodImageLink = foodImageLink;
+        public void setImageUrl(String imageUrl) {
+            this.imageUrl = imageUrl;
         }
     }
 
-    public static class SimilarLiquor {
-        @JsonProperty("이름")
+    public static class Food { // Food는 Data의 필드로서 독립적으로 매핑됨
         private String name;
+        private String imageUrl;
 
         // Getters and Setters
         public String getName() {
@@ -197,6 +165,36 @@ public class RecommendationResponse {
 
         public void setName(String name) {
             this.name = name;
+        }
+
+        public String getImageUrl() {
+            return imageUrl;
+        }
+
+        public void setImageUrl(String imageUrl) {
+            this.imageUrl = imageUrl;
+        }
+    }
+
+    public static class SimilarItem {
+        private String name;
+        private String imageUrl;
+
+        // Getters and Setters
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getImageUrl() {
+            return imageUrl;
+        }
+
+        public void setImageUrl(String imageUrl) {
+            this.imageUrl = imageUrl;
         }
     }
 }

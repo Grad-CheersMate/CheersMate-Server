@@ -3,6 +3,8 @@ package CheersMate.cheersmate.domain.service;
 import CheersMate.cheersmate.domain.dto.*;
 import CheersMate.cheersmate.domain.entity.Feedback;
 import CheersMate.cheersmate.domain.entity.Liquor;
+import CheersMate.cheersmate.domain.enums.Companion;
+import CheersMate.cheersmate.domain.enums.Emotion;
 import CheersMate.cheersmate.domain.repository.FeedbackRepository;
 import CheersMate.cheersmate.domain.repository.LiquorRepository;
 import CheersMate.cheersmate.weather.entity.WeatherData;
@@ -24,7 +26,7 @@ public class RecommendationService {
     private final LiquorRepository liquorRepository;
 
     // Flask 서버 AWS로 설정
-    private final String FLASK_SERVER_URL = "http://15.165.220.173:5001";
+    private final String FLASK_SERVER_URL = "http://52.79.37.145:5001";
 
     public RecommendationService(RestTemplate restTemplate, FeedbackRepository feedbackRepository, WeatherDataRepository weatherDataRepository, LiquorRepository liquorRepository) {
         this.restTemplate = restTemplate;
@@ -47,11 +49,16 @@ public class RecommendationService {
         // 날씨 상태를 condition 값으로 변환
         int condition = mapWeatherConditionToInt(latestWeatherData.getWeatherCondition());
 
+        // 문자열 입력을 Enum을 통해 숫자 코드로 변환
+        int emotionCode = Emotion.fromString(request.getEmotion()).getCode();
+        int companionCode = Companion.fromString(request.getCompanion()).getCode();
+
         // Flask 서버로 보낼 요청 데이터 구성
         RecommendationRequestWithCondition flaskRequest = new RecommendationRequestWithCondition();
         flaskRequest.setCondition(condition);
-        flaskRequest.setMood(request.getMood());
-        flaskRequest.setCompanion(request.getCompanion());
+        flaskRequest.setEmotion(emotionCode);
+        flaskRequest.setCompanion(companionCode);
+
 
         String url = FLASK_SERVER_URL + "/recommend";
         HttpHeaders headers = new HttpHeaders();
@@ -83,6 +90,11 @@ public class RecommendationService {
         // 날씨 상태를 weatherCondition(int) 값으로 변환
         int weatherCondition = mapWeatherConditionToInt(latestWeatherData.getWeatherCondition());
 
+        // 문자열 입력을 Enum을 통해 숫자 코드로 변환
+        int emotionCode = Emotion.fromString(feedbackRequest.getEmotion()).getCode();
+        int companionCode = Companion.fromString(feedbackRequest.getCompanion()).getCode();
+
+
         // Liquor 이름으로 Liquor 엔티티 조회
         Optional<Liquor> optionalLiquor = liquorRepository.findByName(feedbackRequest.getLiquor().getName());
         if (!optionalLiquor.isPresent()) {
@@ -93,9 +105,9 @@ public class RecommendationService {
         // Feedback 생성 및 저장
         Feedback feedback = new Feedback(
                 weatherCondition,
-                feedbackRequest.getEmotion(),
-                feedbackRequest.getCompanion(),
-                liquor,  // Liquor 객체 자체를 참조
+                emotionCode,
+                companionCode,
+                liquor,
                 feedbackRequest.getRating()
         );
 

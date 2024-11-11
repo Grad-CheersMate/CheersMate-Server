@@ -1,26 +1,29 @@
 package CheersMate.cheersmate.domain.dto;
 
+import CheersMate.cheersmate.domain.enums.Companion;
+import CheersMate.cheersmate.domain.enums.Emotion;
+
 public class FeedbackRequest {
 
-    private int emotion;
-    private int companion;
+    private String emotion;
+    private String companion;
     private LiquorName liquor; // 주류 이름을 객체로 받음
     private int rating;
 
     // Getters and Setters
-    public int getEmotion() {
+    public String getEmotion() {
         return emotion;
     }
 
-    public void setEmotion(int emotion) {
+    public void setEmotion(String emotion) {
         this.emotion = emotion;
     }
 
-    public int getCompanion() {
+    public String getCompanion() {
         return companion;
     }
 
-    public void setCompanion(int companion) {
+    public void setCompanion(String companion) {
         this.companion = companion;
     }
 

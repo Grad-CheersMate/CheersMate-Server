@@ -2,23 +2,23 @@ package CheersMate.cheersmate.domain.dto;
 
 public class RecommendationRequest {
 
-    private int mood;
-    private int companion;
+    private String emotion;
+    private String companion;
 
     // Getters and Setters
-    public int getMood() {
-        return mood;
+    public String getEmotion() {
+        return emotion;
     }
 
-    public void setMood(int mood) {
-        this.mood = mood;
+    public void setEmotion(String emotion) {
+        this.emotion = emotion;
     }
 
-    public int getCompanion() {
+    public String getCompanion() {
         return companion;
     }
 
-    public void setCompanion(int companion) {
+    public void setCompanion(String companion) {
         this.companion = companion;
     }
 }
