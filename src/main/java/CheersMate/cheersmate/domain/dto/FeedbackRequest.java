@@ -1,54 +1,38 @@
 package CheersMate.cheersmate.domain.dto;
 
+import CheersMate.cheersmate.domain.enums.Companion;
+import CheersMate.cheersmate.domain.enums.Emotion;
+
 public class FeedbackRequest {
 
-    private int mood;
-    private int companion;
-
-    private String recommendedLiquor;
-    private String drinkType;
-    private double alcoholContent;
+    private String emotion;
+    private String companion;
+    private LiquorName liquor; // 주류 이름을 객체로 받음
     private int rating;
 
-
-    public int getMood() {
-        return mood;
+    // Getters and Setters
+    public String getEmotion() {
+        return emotion;
     }
 
-    public void setMood(int mood) {
-        this.mood = mood;
+    public void setEmotion(String emotion) {
+        this.emotion = emotion;
     }
 
-    public int getCompanion() {
+    public String getCompanion() {
         return companion;
     }
 
-    public void setCompanion(int companion) {
+    public void setCompanion(String companion) {
         this.companion = companion;
     }
 
-    public String getRecommendedLiquor() {
-        return recommendedLiquor;
+    public LiquorName getLiquor() {
+        return liquor;
     }
 
-    public void setRecommendedLiquor(String recommendedLiquor) {
-        this.recommendedLiquor = recommendedLiquor;
-    }
-
-    public String getDrinkType() {
-        return drinkType;
-    }
-
-    public void setDrinkType(String drinkType) {
-        this.drinkType = drinkType;
-    }
-
-    public double getAlcoholContent() {
-        return alcoholContent;
-    }
-
-    public void setAlcoholContent(double alcoholContent) {
-        this.alcoholContent = alcoholContent;
+    public void setLiquor(LiquorName liquor) {
+        this.liquor = liquor;
     }
 
     public int getRating() {
@@ -57,5 +41,18 @@ public class FeedbackRequest {
 
     public void setRating(int rating) {
         this.rating = rating;
+    }
+
+    public static class LiquorName {
+        private String name;
+
+        // Getters and Setters
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
     }
 }
