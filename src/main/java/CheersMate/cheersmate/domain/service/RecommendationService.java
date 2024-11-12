@@ -15,6 +15,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -37,6 +39,15 @@ public class RecommendationService {
         // RestTemplate에 UTF-8 인코딩 설정 추가
         this.restTemplate.getMessageConverters()
                 .add(0, new StringHttpMessageConverter(StandardCharsets.UTF_8));
+    }
+
+    // Flask 응답을 프론트엔드 응답으로 변환
+    public FrontendRecommendationResponse getFrontendRecommendation(RecommendationRequest request) {
+        RecommendationResponse flaskResponse = getRecommendation(request);
+
+        FrontendRecommendationResponse frontendResponse = transformToFrontendResponse(flaskResponse);
+
+        return frontendResponse;
     }
 
     public RecommendationResponse getRecommendation(RecommendationRequest request) {
@@ -112,6 +123,62 @@ public class RecommendationService {
         );
 
         feedbackRepository.save(feedback);
+    }
+
+    private FrontendRecommendationResponse transformToFrontendResponse(RecommendationResponse flaskResponse) {
+        FrontendRecommendationResponse frontendResponse = new FrontendRecommendationResponse();
+
+        // 기본 필드 설정
+        frontendResponse.setResult(flaskResponse.isResult());
+        frontendResponse.setHttpCode(flaskResponse.getHttpCode());
+        frontendResponse.setError(flaskResponse.getError());
+
+        // Data 객체 변환
+        FrontendRecommendationResponse.Data frontendData = new FrontendRecommendationResponse.Data();
+
+        // Request 필드 복사
+        FrontendRecommendationResponse.Request frontendRequest = new FrontendRecommendationResponse.Request();
+        frontendRequest.setWeather(flaskResponse.getData().getRequest().getWeather());
+        frontendRequest.setEmotion(flaskResponse.getData().getRequest().getEmotion());
+        frontendRequest.setCompanion(flaskResponse.getData().getRequest().getCompanion());
+        frontendData.setRequest(frontendRequest);
+
+        // Recommend 변환
+        FrontendRecommendationResponse.Recommend frontendRecommend = new FrontendRecommendationResponse.Recommend();
+        FrontendRecommendationResponse.Liquor frontendLiquor = new FrontendRecommendationResponse.Liquor();
+        RecommendationResponse.Recommend flaskRecommend = flaskResponse.getData().getRecommend();
+
+        frontendLiquor.setName(flaskRecommend.getName());
+        frontendLiquor.setVolume(flaskRecommend.getVolume());
+        frontendLiquor.setType(flaskRecommend.getType());
+        frontendLiquor.setImageUrl(flaskRecommend.getImageUrl());
+        frontendRecommend.setLiquor(frontendLiquor);
+        frontendData.setRecommend(frontendRecommend);
+
+        // Food 복사
+        FrontendRecommendationResponse.Food frontendFood = new FrontendRecommendationResponse.Food();
+        frontendFood.setName(flaskResponse.getData().getFood().getName());
+        frontendFood.setImageUrl(flaskResponse.getData().getFood().getImageUrl());
+        frontendData.setFood(frontendFood);
+
+        // Similar 리스트 변환
+        List<FrontendRecommendationResponse.SimilarItem> frontendSimilarList = new ArrayList<>();
+        for (RecommendationResponse.SimilarItem flaskSimilarItem : flaskResponse.getData().getSimilar()) {
+            FrontendRecommendationResponse.SimilarItem frontendSimilarItem = new FrontendRecommendationResponse.SimilarItem();
+            FrontendRecommendationResponse.Liquor similarLiquor = new FrontendRecommendationResponse.Liquor();
+
+            similarLiquor.setName(flaskSimilarItem.getName());
+            similarLiquor.setImageUrl(flaskSimilarItem.getImageUrl());
+            // 필요한 경우 다른 필드도 설정
+
+            frontendSimilarItem.setLiquor(similarLiquor);
+            frontendSimilarList.add(frontendSimilarItem);
+        }
+        frontendData.setSimilar(frontendSimilarList);
+
+        frontendResponse.setData(frontendData);
+
+        return frontendResponse;
     }
 
     // WeatherCondition을 condition(int)로 매핑하는 메서드
