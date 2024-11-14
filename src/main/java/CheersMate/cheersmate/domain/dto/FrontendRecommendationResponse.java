@@ -47,7 +47,7 @@ public class FrontendRecommendationResponse {
 
     public static class Data {
         private Request request;
-        private Recommend recommend;
+        private List<Recommend> recommend;
         private List<Food> food;
         private List<SimilarItem> similar;
 
@@ -61,11 +61,11 @@ public class FrontendRecommendationResponse {
             this.request = request;
         }
 
-        public Recommend getRecommend() {
+        public List<Recommend> getRecommend() {
             return recommend;
         }
 
-        public void setRecommend(Recommend recommend) {
+        public void setRecommend(List<Recommend> recommend) {
             this.recommend = recommend;
         }
 

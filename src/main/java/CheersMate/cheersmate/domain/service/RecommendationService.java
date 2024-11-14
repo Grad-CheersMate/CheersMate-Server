@@ -28,7 +28,7 @@ public class RecommendationService {
     private final LiquorRepository liquorRepository;
 
     // Flask 서버 AWS로 설정
-    private final String FLASK_SERVER_URL = "http://localhost:5001";
+    private final String FLASK_SERVER_URL = "http://52.79.37.145:5001";
 
     public RecommendationService(RestTemplate restTemplate, FeedbackRepository feedbackRepository, WeatherDataRepository weatherDataRepository, LiquorRepository liquorRepository) {
         this.restTemplate = restTemplate;
@@ -91,6 +91,89 @@ public class RecommendationService {
         return response.getBody();
     }
 
+    // WeatherRecommendation 메서드 추가
+    public FrontendRecommendationResponse getWeatherRecommendation() {
+        WeatherRecommendationResponse flaskResponse = getWeatherBasedRecommendation();
+
+        FrontendRecommendationResponse frontendResponse = transformToFrontendWeatherResponse(flaskResponse);
+
+        return frontendResponse;
+    }
+
+    // Flask의 /recommend/weather API 호출 메서드
+    public WeatherRecommendationResponse getWeatherBasedRecommendation() {
+        // 최신 날씨 데이터 가져오기
+        WeatherData latestWeatherData = weatherDataRepository.findTopByOrderByWeatherDateDescWeatherTimeDesc();
+        if (latestWeatherData == null) {
+            throw new RuntimeException("날씨 데이터가 없습니다.");
+        }
+
+        // 날씨 상태를 condition 값으로 변환
+        int condition = mapWeatherConditionToInt(latestWeatherData.getWeatherCondition());
+
+        String url = FLASK_SERVER_URL + "/recommend/weather?condition=" + condition;
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<Void> httpEntity = new HttpEntity<>(headers);
+        ResponseEntity<WeatherRecommendationResponse> response = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                httpEntity,
+                WeatherRecommendationResponse.class
+        );
+
+        if (response.getBody() == null || !response.getBody().isResult()) {
+            String errorMessage = response.getBody() != null ? response.getBody().getError() : "Flask 서버로부터 응답을 받지 못했습니다.";
+            throw new RuntimeException(errorMessage);
+        }
+
+        return response.getBody();
+    }
+
+    // Flask 응답을 프론트엔드 응답으로 변환하는 메서드 (Weather)
+    private FrontendRecommendationResponse transformToFrontendWeatherResponse(WeatherRecommendationResponse flaskResponse) {
+        FrontendRecommendationResponse frontendResponse = new FrontendRecommendationResponse();
+
+        // 기본 필드 설정
+        frontendResponse.setResult(flaskResponse.isResult());
+        frontendResponse.setHttpCode(flaskResponse.getHttpCode());
+        frontendResponse.setError(flaskResponse.getError());
+
+        // Data 객체 변환
+        FrontendRecommendationResponse.Data frontendData = new FrontendRecommendationResponse.Data();
+
+        // Request 필드 복사
+        FrontendRecommendationResponse.Request frontendRequest = new FrontendRecommendationResponse.Request();
+        frontendRequest.setWeather(flaskResponse.getData().getRequest().getWeather());
+        frontendData.setRequest(frontendRequest);
+
+        // Recommend 리스트 변환
+        List<FrontendRecommendationResponse.Recommend> frontendRecommendList = new ArrayList<>();
+        for (WeatherRecommendationResponse.Recommend flaskRecommend : flaskResponse.getData().getRecommend()) {
+            FrontendRecommendationResponse.Recommend frontendRecommend = new FrontendRecommendationResponse.Recommend();
+            FrontendRecommendationResponse.Liquor frontendLiquor = new FrontendRecommendationResponse.Liquor();
+
+            frontendLiquor.setName(flaskRecommend.getName());
+            frontendLiquor.setVolume(flaskRecommend.getVolume());
+            frontendLiquor.setType(flaskRecommend.getType());
+            frontendLiquor.setImageUrl(flaskRecommend.getImageUrl());
+
+            frontendRecommend.setLiquor(frontendLiquor);
+            frontendRecommendList.add(frontendRecommend);
+        }
+        frontendData.setRecommend(frontendRecommendList);
+
+        // food와 similar 필드는 없음
+        frontendData.setFood(null);
+        frontendData.setSimilar(null);
+
+        frontendResponse.setData(frontendData);
+
+        return frontendResponse;
+    }
+
+
     public void saveFeedback(FeedbackRequest feedbackRequest) {
         // 최신 날씨 데이터 가져오기
         WeatherData latestWeatherData = weatherDataRepository.findTopByOrderByWeatherDateDescWeatherTimeDesc();
@@ -143,7 +226,7 @@ public class RecommendationService {
         frontendRequest.setCompanion(flaskResponse.getData().getRequest().getCompanion());
         frontendData.setRequest(frontendRequest);
 
-        // Recommend 변환
+        // Recommend 변환 (단일 객체를 리스트로 변환)
         FrontendRecommendationResponse.Recommend frontendRecommend = new FrontendRecommendationResponse.Recommend();
         FrontendRecommendationResponse.Liquor frontendLiquor = new FrontendRecommendationResponse.Liquor();
         RecommendationResponse.Recommend flaskRecommend = flaskResponse.getData().getRecommend();
@@ -153,7 +236,10 @@ public class RecommendationService {
         frontendLiquor.setType(flaskRecommend.getType());
         frontendLiquor.setImageUrl(flaskRecommend.getImageUrl());
         frontendRecommend.setLiquor(frontendLiquor);
-        frontendData.setRecommend(frontendRecommend);
+
+        List<FrontendRecommendationResponse.Recommend> frontendRecommendList = new ArrayList<>();
+        frontendRecommendList.add(frontendRecommend);
+        frontendData.setRecommend(frontendRecommendList);
 
         // Food 복사
         List<FrontendRecommendationResponse.Food> frontendFoodList = new ArrayList<>();

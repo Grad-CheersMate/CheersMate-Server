@@ -29,4 +29,10 @@ public class RecommendationController {
         recommendationService.saveFeedback(feedbackRequest);
         return "사용자 평가가 성공적으로 저장되었습니다.";
     }
+
+    @GetMapping("/recommend/weather")
+    public ResponseEntity<FrontendRecommendationResponse> getWeatherRecommendation() {
+        FrontendRecommendationResponse response = recommendationService.getWeatherRecommendation();
+        return ResponseEntity.ok(response);
+    }
 }

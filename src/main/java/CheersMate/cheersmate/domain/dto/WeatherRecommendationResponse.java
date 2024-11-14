@@ -2,7 +2,7 @@ package CheersMate.cheersmate.domain.dto;
 
 import java.util.List;
 
-public class RecommendationResponse {
+public class WeatherRecommendationResponse {
 
     private boolean result;
     private int httpCode;
@@ -47,9 +47,8 @@ public class RecommendationResponse {
 
     public static class Data {
         private Request request;
-        private Recommend recommend; // 단일 객체
-        private List<Food> food;
-        private List<SimilarItem> similar;
+        private List<Recommend> recommend; // 리스트
+
 
         // Getters and Setters
 
@@ -61,35 +60,17 @@ public class RecommendationResponse {
             this.request = request;
         }
 
-        public Recommend getRecommend() {
+        public List<Recommend> getRecommend() {
             return recommend;
         }
 
-        public void setRecommend(Recommend recommend) {
+        public void setRecommend(List<Recommend> recommend) {
             this.recommend = recommend;
-        }
-
-        public List<Food> getFood() {
-            return food;
-        }
-
-        public void setFood(List<Food> food) {
-            this.food = food;
-        }
-
-        public List<SimilarItem> getSimilar() {
-            return similar;
-        }
-
-        public void setSimilar(List<SimilarItem> similar) {
-            this.similar = similar;
         }
     }
 
     public static class Request {
         private String weather;
-        private String emotion;
-        private String companion;
 
         // Getters and Setters
 
@@ -99,22 +80,6 @@ public class RecommendationResponse {
 
         public void setWeather(String weather) {
             this.weather = weather;
-        }
-
-        public String getEmotion() {
-            return emotion;
-        }
-
-        public void setEmotion(String emotion) {
-            this.emotion = emotion;
-        }
-
-        public String getCompanion() {
-            return companion;
-        }
-
-        public void setCompanion(String companion) {
-            this.companion = companion;
         }
     }
 
@@ -148,52 +113,6 @@ public class RecommendationResponse {
 
         public void setType(String type) {
             this.type = type;
-        }
-
-        public String getImageUrl() {
-            return imageUrl;
-        }
-
-        public void setImageUrl(String imageUrl) {
-            this.imageUrl = imageUrl;
-        }
-    }
-
-    public static class Food {
-        private String name;
-        private String imageUrl;
-
-        // Getters and Setters
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public String getImageUrl() {
-            return imageUrl;
-        }
-
-        public void setImageUrl(String imageUrl) {
-            this.imageUrl = imageUrl;
-        }
-    }
-
-    public static class SimilarItem {
-        private String name;
-        private String imageUrl;
-
-        // Getters and Setters
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
         }
 
         public String getImageUrl() {
