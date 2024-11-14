@@ -27,8 +27,9 @@ public class LiquorController {
     @GetMapping("api/liquors/category")
     public ResponseEntity<?> getLiquorsByCategoryPaged(
             @RequestParam String category,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "30") int size) {
+            @RequestParam(defaultValue = "0") int page) {
+        //size 20고정
+        int size = 20;
         Page<LiquorDTO> liquorsByCategoryPaged = liquorService.getLiquorsByCategoryPaged(category, page, size);
 
         if (liquorsByCategoryPaged.isEmpty()) {
@@ -90,6 +91,24 @@ public class LiquorController {
         liquorService.deleteLiquor(id);
         log.info("{\"result\": 1, \"httpCode\": 200}");
         return ResponseEntity.ok(new ApiResponse(true, 200));
+    }
+
+    // 검색 API 추가
+    @GetMapping("api/liquors/search")
+    public ResponseEntity<?> searchLiquors(
+            @RequestParam String keyword,
+            @RequestParam(defaultValue = "0") int page) {
+        int size = 20; // size를 20으로 고정
+        Page<LiquorDTO> liquorsByKeyword = liquorService.searchLiquors(keyword, page, size);
+
+        if (liquorsByKeyword.isEmpty()) {
+            log.info("{\"result\": 0, \"httpCode\": 404, \"message\": \"No liquors found with the given keyword\"}");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ErrorResponse(false, 404, "No liquors found with the given keyword"));
+        }
+
+        log.info("{\"result\": 1, \"httpCode\": 200, \"liquors\": {}}", liquorsByKeyword);
+        return ResponseEntity.ok(new LiquorResponse(true, 200, liquorsByKeyword));
     }
 
     // 관리자 인증 메서드
