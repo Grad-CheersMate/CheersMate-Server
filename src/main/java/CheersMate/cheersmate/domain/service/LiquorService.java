@@ -77,4 +77,10 @@ public class LiquorService {
         Pageable pageable = PageRequest.of(page, size);
         return liquorRepository.findByCategory(category, pageable).map(this::convertToDTO);
     }
+
+    // 검색 로직 추가
+    public Page<LiquorDTO> searchLiquors(String keyword, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return liquorRepository.findByNameContaining(keyword, pageable).map(this::convertToDTO);
+    }
 }
