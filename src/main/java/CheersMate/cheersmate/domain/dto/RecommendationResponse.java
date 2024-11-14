@@ -46,7 +46,7 @@ public class RecommendationResponse {
     public static class Data {
         private Request request;
         private Recommend recommend; // Recommend 타입으로 변경하여 사용
-        private Food food; // 별도의 Food 필드 추가
+        private List<Food> food; // 별도의 Food 필드 추가
         private List<SimilarItem> similar;
 
         // Getters and Setters
@@ -66,11 +66,9 @@ public class RecommendationResponse {
             this.recommend = recommend;
         }
 
-        public Food getFood() {
-            return food;
-        }
+        public List<Food> getFood() { return food; }
 
-        public void setFood(Food food) {
+        public void setFood(List<Food> food) {
             this.food = food;
         }
 

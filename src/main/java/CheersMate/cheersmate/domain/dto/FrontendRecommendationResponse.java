@@ -48,7 +48,7 @@ public class FrontendRecommendationResponse {
     public static class Data {
         private Request request;
         private Recommend recommend;
-        private Food food;
+        private List<Food> food;
         private List<SimilarItem> similar;
 
         // Getters and Setters
@@ -69,11 +69,11 @@ public class FrontendRecommendationResponse {
             this.recommend = recommend;
         }
 
-        public Food getFood() {
+        public List<Food> getFood() {
             return food;
         }
 
-        public void setFood(Food food) {
+        public void setFood(List<Food> food) {
             this.food = food;
         }
 
