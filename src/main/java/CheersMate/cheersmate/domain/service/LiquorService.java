@@ -83,4 +83,9 @@ public class LiquorService {
         Pageable pageable = PageRequest.of(page, size);
         return liquorRepository.findByNameContaining(keyword, pageable).map(this::convertToDTO);
     }
+
+    public Page<LiquorDTO> getLiquorsWithPaging(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return liquorRepository.findAll(pageable).map(this::convertToDTO);
+    }
 }

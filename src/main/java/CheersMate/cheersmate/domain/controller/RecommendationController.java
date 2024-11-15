@@ -1,9 +1,6 @@
 package CheersMate.cheersmate.domain.controller;
 
-import CheersMate.cheersmate.domain.dto.FeedbackRequest;
-import CheersMate.cheersmate.domain.dto.FrontendRecommendationResponse;
-import CheersMate.cheersmate.domain.dto.RecommendationRequest;
-import CheersMate.cheersmate.domain.dto.RecommendationResponse;
+import CheersMate.cheersmate.domain.dto.*;
 import CheersMate.cheersmate.domain.service.RecommendationService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -34,5 +31,11 @@ public class RecommendationController {
     public ResponseEntity<FrontendRecommendationResponse> getWeatherRecommendation() {
         FrontendRecommendationResponse response = recommendationService.getWeatherRecommendation();
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/admin/feedback")
+    public ResponseEntity<FeedbackStatisticsDTO> getFeedbackStatistics() {
+        FeedbackStatisticsDTO statistics = recommendationService.getFeedbackStatistics();
+        return ResponseEntity.ok(statistics);
     }
 }

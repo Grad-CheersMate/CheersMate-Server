@@ -8,6 +8,7 @@ import CheersMate.cheersmate.response.ErrorResponse;
 import CheersMate.cheersmate.response.FoodResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +22,24 @@ import java.util.List;
 public class FoodController {
     private final FoodService foodService;
     private final JwtTokenUtil jwtTokenUtil;
+
+    // 음식 페이징
+    @GetMapping("/page")
+    public ResponseEntity<?> getPageFoods(
+            @RequestHeader("Authorization") String token,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size
+    ) {
+        if (!isAdmin(token)) {
+            String message = "Access denied: User does not have admin privileges.";
+            log.info("{\"result\": 0, \"httpCode\": 403, \"message\": \"{}\"}", message);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ErrorResponse(false, 403, message));
+        }
+
+        Page<FoodDTO> foods = foodService.getFoodsWithPaging(page, size); // 페이징된 음식 데이터
+        log.info("{\"result\": 1, \"httpCode\": 200, \"foods\": {}}", foods);
+        return ResponseEntity.ok(new FoodResponse(true, 200, foods));
+    }
 
     // 음식 조회
     @GetMapping

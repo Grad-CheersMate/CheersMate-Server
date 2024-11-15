@@ -4,6 +4,9 @@ import CheersMate.cheersmate.domain.dto.FoodDTO;
 import CheersMate.cheersmate.domain.entity.Food;
 import CheersMate.cheersmate.domain.repository.FoodRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -82,5 +85,10 @@ public class FoodService {
     @Transactional
     public void deleteFood(Long foodId) {
         foodRepository.deleteById(foodId);
+    }
+
+    public Page<FoodDTO> getFoodsWithPaging(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return foodRepository.findAll(pageable).map(FoodDTO::fromEntity);
     }
 }

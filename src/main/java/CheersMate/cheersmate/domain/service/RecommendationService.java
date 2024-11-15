@@ -17,7 +17,9 @@ import org.springframework.web.client.RestTemplate;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class RecommendationService {
@@ -293,4 +295,70 @@ public class RecommendationService {
                 return 0; // 기본값 설정
         }
     }
+
+    public FeedbackStatisticsDTO getFeedbackStatistics() {
+        List<Feedback> feedbacks = feedbackRepository.findAll();
+
+        // Group by weatherCondition with human-readable names
+        Map<String, Long> weatherStats = feedbacks.stream()
+                .collect(Collectors.groupingBy(
+                        feedback -> convertWeatherCondition(feedback.getWeatherCondition()),
+                        Collectors.counting()
+                ));
+
+        // Group by emotion with human-readable names
+        Map<String, Long> emotionStats = feedbacks.stream()
+                .collect(Collectors.groupingBy(
+                        feedback -> convertEmotion(feedback.getEmotion()),
+                        Collectors.counting()
+                ));
+
+        // Group by companion with human-readable names
+        Map<String, Long> companionStats = feedbacks.stream()
+                .collect(Collectors.groupingBy(
+                        feedback -> convertCompanion(feedback.getCompanion()),
+                        Collectors.counting()
+                ));
+
+        // Calculate average rating
+        double averageRating = feedbacks.stream()
+                .mapToInt(Feedback::getRating)
+                .average()
+                .orElse(0.0);
+
+        // Return as DTO
+        return new FeedbackStatisticsDTO(averageRating, weatherStats, emotionStats, companionStats);
+    }
+
+    private String convertWeatherCondition(int code) {
+        switch (code) {
+            case 0: return "맑음";
+            case 1: return "비";
+            case 2: return "눈";
+            case 3: return "흐림";
+            case 4: return "더운 날";
+            case 5: return "추운 날";
+            case 6: return "바람 부는 날";
+            default: return "알 수 없음";
+        }
+    }
+
+    private String convertEmotion(int code) {
+        for (Emotion emotion : Emotion.values()) {
+            if (emotion.getCode() == code) {
+                return emotion.name();
+            }
+        }
+        return "알 수 없음";
+    }
+
+    private String convertCompanion(int code) {
+        for (Companion companion : Companion.values()) {
+            if (companion.getCode() == code) {
+                return companion.name();
+            }
+        }
+        return "알 수 없음";
+    }
+
 }

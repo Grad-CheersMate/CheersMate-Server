@@ -14,6 +14,7 @@ import CheersMate.cheersmate.users.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,13 +23,28 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/users")
+@RequestMapping
 public class UserController {
     private final UserService userService;
     private final JwtTokenUtil jwtTokenUtil;
     private final PasswordEncoder passwordEncoder;
 
-    @PostMapping("/login")
+    // 사용자 데이터 페이징
+    @GetMapping("/api/admin/users/page")
+    public ResponseEntity<?> getUsers(
+            @RequestHeader("Authorization") String token,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size
+    ) {
+        if (!isAdmin(token)) {
+            return ResponseEntity.status(403).body("Access Denied");
+        }
+
+        Page<UserDTO> users = userService.getUsersWithPaging(page, size);
+        return ResponseEntity.ok(new UserResponse(true, 200, users));
+    }
+
+    @PostMapping("/users/login")
     public ResponseEntity<?> loginUser(@RequestBody LoginDTO request) {
         log.info("Received login request with email: {} and password: {}", request.getEmail(), request.getPassword());
         Users user = userService.login(request.getEmail(), request.getPassword());
@@ -45,7 +61,7 @@ public class UserController {
         }
     }
 
-    @PostMapping("/register")
+    @PostMapping("/users/register")
     public ResponseEntity<?> registerUser(@RequestBody @Valid UserDTO request) {
         try {
             String encodedPassword = passwordEncoder.encode(request.getPassword());
@@ -70,7 +86,7 @@ public class UserController {
         }
     }
 
-    @PostMapping("/emailFind")
+    @PostMapping("/users/emailFind")
     public ResponseEntity<?> emailFind(@RequestBody UserDTO request) {
         try {
             Users user = userService.findEmail(request.getTell(), request.getNickname());
@@ -91,7 +107,7 @@ public class UserController {
         }
     }
 
-    @PostMapping("/passFind")
+    @PostMapping("/users/passFind")
     public ResponseEntity<?> passFind(@RequestBody UserDTO request) {
         try {
             Users user = userService.findPass(request.getEmail(), request.getTell());
@@ -115,7 +131,7 @@ public class UserController {
         }
     }
 
-    @PutMapping("/passReset")
+    @PutMapping("/users/passReset")
     public ResponseEntity<?> resetPassword(@RequestBody ChangePasswordDTO request) {
         try {
             Users user = userService.findUserByEmail(request.getEmail());
@@ -140,7 +156,7 @@ public class UserController {
         }
     }
 
-    @PutMapping("/infoChange")
+    @PutMapping("/users/infoChange")
     public ResponseEntity<?> updateUser(@RequestHeader("Authorization") String token, @RequestBody @Valid UserDTO request) {
         try {
             token = token.substring(7);
@@ -161,7 +177,7 @@ public class UserController {
         }
     }
 
-    @DeleteMapping()
+    @DeleteMapping("/users")
     public ResponseEntity<?> deleteUser(@RequestHeader("Authorization") String token) {
         try {
             token = token.substring(7);
@@ -180,5 +196,11 @@ public class UserController {
             log.error("Error during user deletion", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse(false,600));
         }
+    }
+
+    // 관리자 인증 메서드
+    private boolean isAdmin(String token) {
+        String role = jwtTokenUtil.extractRole(token.substring(7));
+        return "ADMIN".equals(role);
     }
 }

@@ -1,9 +1,13 @@
 package CheersMate.cheersmate.users.service;
 
 import CheersMate.cheersmate.exception.CustomValidationException;
+import CheersMate.cheersmate.users.dto.UserDTO;
 import CheersMate.cheersmate.users.entity.Users;
 import CheersMate.cheersmate.users.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -98,5 +102,10 @@ public class UserService {
             password.append(chars.charAt(random.nextInt(chars.length())));
         }
         return password.toString();
+    }
+
+    public Page<UserDTO> getUsersWithPaging(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return userRepository.findAll(pageable).map(UserDTO::fromEntity);
     }
 }

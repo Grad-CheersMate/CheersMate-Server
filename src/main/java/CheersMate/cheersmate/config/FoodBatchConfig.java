@@ -40,7 +40,7 @@ public class FoodBatchConfig {
         reader.setEncoding("UTF-8");
         reader.setLineMapper(new DefaultLineMapper<Food>() {{
             setLineTokenizer(new DelimitedLineTokenizer() {{
-                setNames("category", "name", "image");
+                setNames("category", "name", "imageLink");
             }});
             setFieldSetMapper(new BeanWrapperFieldSetMapper<>() {{
                 setTargetType(Food.class);

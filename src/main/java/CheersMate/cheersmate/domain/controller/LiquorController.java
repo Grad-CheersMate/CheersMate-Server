@@ -111,6 +111,19 @@ public class LiquorController {
         return ResponseEntity.ok(new LiquorResponse(true, 200, liquorsByKeyword));
     }
 
+    @GetMapping("/api/admin/liquor/page")
+    public ResponseEntity<?> getLiquorsWithPaging(
+            @RequestHeader("Authorization") String token,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        if (!isAdmin(token)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("권한이 없습니다.");
+        }
+        Page<LiquorDTO> liquors = liquorService.getLiquorsWithPaging(page, size);
+        log.info("{\"result\": 1, \"httpCode\": 200, \"liquors\": {}}", liquors);
+        return ResponseEntity.ok(new LiquorResponse(true, 200, liquors));
+    }
+
     // 관리자 인증 메서드
     private boolean isAdmin(String token) {
         String role = jwtTokenUtil.extractRole(token.substring(7));
