@@ -44,6 +44,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
                 path.startsWith("/batch/start")||
                 path.startsWith("/v3/api-docs") ||
                 path.startsWith("/js/") ||
+                path.startsWith("/images/") ||
                 path.equals("/auth/home") ||
                 path.equals("/auth/login")) {
             // Skip token validation for these paths

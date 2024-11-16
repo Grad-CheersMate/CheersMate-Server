@@ -299,25 +299,25 @@ public class RecommendationService {
     public FeedbackStatisticsDTO getFeedbackStatistics() {
         List<Feedback> feedbacks = feedbackRepository.findAll();
 
-        // Group by weatherCondition with human-readable names
-        Map<String, Long> weatherStats = feedbacks.stream()
+        // 감정별 평균 점수 계산
+        Map<String, Double> emotionStats = feedbacks.stream()
                 .collect(Collectors.groupingBy(
-                        feedback -> convertWeatherCondition(feedback.getWeatherCondition()),
-                        Collectors.counting()
+                        feedback -> convertEmotion(feedback.getEmotion()), // 감정을 사람이 읽을 수 있는 값으로 변환
+                        Collectors.averagingDouble(Feedback::getRating)   // 각 그룹의 평균 점수 계산
                 ));
 
-        // Group by emotion with human-readable names
-        Map<String, Long> emotionStats = feedbacks.stream()
+        // 날씨별 평균 점수 계산
+        Map<String, Double> weatherStats = feedbacks.stream()
                 .collect(Collectors.groupingBy(
-                        feedback -> convertEmotion(feedback.getEmotion()),
-                        Collectors.counting()
+                        feedback -> convertWeatherCondition(feedback.getWeatherCondition()), // 날씨를 사람이 읽을 수 있는 값으로 변환
+                        Collectors.averagingDouble(Feedback::getRating)                      // 각 그룹의 평균 점수 계산
                 ));
 
-        // Group by companion with human-readable names
-        Map<String, Long> companionStats = feedbacks.stream()
+        // 동반자별 평균 점수 계산
+        Map<String, Double> companionStats = feedbacks.stream()
                 .collect(Collectors.groupingBy(
-                        feedback -> convertCompanion(feedback.getCompanion()),
-                        Collectors.counting()
+                        feedback -> convertCompanion(feedback.getCompanion()), // 동반자를 사람이 읽을 수 있는 값으로 변환
+                        Collectors.averagingDouble(Feedback::getRating)       // 각 그룹의 평균 점수 계산
                 ));
 
         // Calculate average rating
