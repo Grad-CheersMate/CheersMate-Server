@@ -29,7 +29,7 @@ public class RecommendationService {
     private final LiquorRepository liquorRepository;
 
     // Flask 서버 AWS로 설정
-    private final String FLASK_SERVER_URL = "http://localhost:5001";
+    private final String FLASK_SERVER_URL = "http://52.79.37.145:5001";
 
     public RecommendationService(RestTemplate restTemplate, FeedbackRepository feedbackRepository, WeatherDataRepository weatherDataRepository, LiquorRepository liquorRepository) {
         this.restTemplate = restTemplate;
