@@ -4,6 +4,7 @@ public class RecommendationRequest {
 
     private String emotion;
     private String companion;
+    private String volume;
 
     // Getters and Setters
     public String getEmotion() {
@@ -20,5 +21,13 @@ public class RecommendationRequest {
 
     public void setCompanion(String companion) {
         this.companion = companion;
+    }
+
+    public String getVolume() {
+        return volume;
+    }
+
+    public void setVolume(String volume) {
+        this.volume = volume;
     }
 }

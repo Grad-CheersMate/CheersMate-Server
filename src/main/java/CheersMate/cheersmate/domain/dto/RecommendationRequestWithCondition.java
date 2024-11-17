@@ -5,6 +5,7 @@ public class RecommendationRequestWithCondition {
     private int condition;
     private int emotion;
     private int companion;
+    private int volume;
 
     // Getters and Setters
     public int getCondition() {
@@ -29,5 +30,13 @@ public class RecommendationRequestWithCondition {
 
     public void setCompanion(int companion) {
         this.companion = companion;
+    }
+
+    public int getVolume() {
+        return volume;
+    }
+
+    public void setVolume(int volume) {
+        this.volume = volume;
     }
 }

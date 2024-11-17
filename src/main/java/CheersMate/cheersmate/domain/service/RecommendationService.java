@@ -5,6 +5,7 @@ import CheersMate.cheersmate.domain.entity.Feedback;
 import CheersMate.cheersmate.domain.entity.Liquor;
 import CheersMate.cheersmate.domain.enums.Companion;
 import CheersMate.cheersmate.domain.enums.Emotion;
+import CheersMate.cheersmate.domain.enums.Volume;
 import CheersMate.cheersmate.domain.repository.FeedbackRepository;
 import CheersMate.cheersmate.domain.repository.LiquorRepository;
 import CheersMate.cheersmate.weather.entity.WeatherData;
@@ -63,12 +64,14 @@ public class RecommendationService {
         // 문자열 입력을 Enum을 통해 숫자 코드로 변환
         int emotionCode = Emotion.fromString(request.getEmotion()).getCode();
         int companionCode = Companion.fromString(request.getCompanion()).getCode();
+        int volumeCode = Volume.fromString(request.getVolume()).getCode();
 
         // Flask 서버로 보낼 요청 데이터 구성
         RecommendationRequestWithCondition flaskRequest = new RecommendationRequestWithCondition();
         flaskRequest.setCondition(condition);
         flaskRequest.setEmotion(emotionCode);
         flaskRequest.setCompanion(companionCode);
+        flaskRequest.setVolume(volumeCode);
 
 
         String url = FLASK_SERVER_URL + "/recommend";
