@@ -9,6 +9,8 @@ import CheersMate.cheersmate.domain.repository.FeedbackRepository;
 import CheersMate.cheersmate.domain.repository.LiquorRepository;
 import CheersMate.cheersmate.weather.entity.WeatherData;
 import CheersMate.cheersmate.weather.repository.WeatherDataRepository;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.*;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.stereotype.Service;
@@ -361,4 +363,19 @@ public class RecommendationService {
         return "알 수 없음";
     }
 
+    public List<RatingDTO> getTopRatedLiquors() {
+        Pageable top20 = PageRequest.of(0, 20); // 상위 20개 페이징
+        List<Object[]> results = feedbackRepository.findTopRatedLiquors(top20);
+
+        // Object[] 데이터를 LiquorDTO로 변환하고 RatingDTO로 감싸기
+        return results.stream()
+                .map(row -> {
+                    LiquorDTO liquor = new LiquorDTO();
+                    liquor.setId((Long) row[0]);          // liquorId
+                    liquor.setName((String) row[1]);      // liquorName
+                    liquor.setImageLink((String) row[2]); // liquorImage
+                    return new RatingDTO(liquor); // LiquorDTO를 감싸기
+                })
+                .collect(Collectors.toList());
+    }
 }
