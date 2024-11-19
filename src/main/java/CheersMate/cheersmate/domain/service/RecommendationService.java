@@ -278,19 +278,19 @@ public class RecommendationService {
     private int mapWeatherConditionToInt(String weatherCondition) {
         // weatherCondition에 따라 적절한 int 값을 반환하도록 매핑
         switch (weatherCondition) {
-            case "맑음":
+            case "sunny":
                 return 0;
-            case "비":
+            case "rainy":
                 return 1;
-            case "눈":
+            case "snowy":
                 return 2;
-            case "흐림":
+            case "cloudy":
                 return 3;
-            case "더운 날":
+            case "hot":
                 return 4;
-            case "바람 부는 날":
+            case "windy":
                 return 5;
-            case "추운 날":
+            case "cold":
                 return 6;
             default:
                 return 0; // 기본값 설정
