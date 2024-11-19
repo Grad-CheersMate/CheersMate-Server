@@ -202,29 +202,29 @@ public class WeatherService {
 
             // 1. 비 또는 눈
             if (pty == 1 || pty == 2 || pty == 4) {
-                condition = "비";
+                condition = "rainy";
             } else if (pty == 3) {
-                condition = "눈";
+                condition = "snowy";
             }
             // 2. 흐림
             else if (reh >= 80 && pty == 0) {
-                condition = "흐림";
+                condition = "cloudy";
             }
             // 3. 더운 날
             else if (t1h >= 30) {
-                condition = "더운 날";
+                condition = "hot";
             }
             // 4. 추운 날
             else if (t1h <= 5) {
-                condition = "추운 날";
+                condition = "cold";
             }
             // 5. 바람 부는 날
             else if (wsd >= 8) {
-                condition = "바람 부는 날";
+                condition = "windy";
             }
             // 6. 맑음
             else {
-                condition = "맑음";
+                condition = "sunny";
             }
 
             return condition;
