@@ -4,8 +4,8 @@ public class LiquorDTO {
 
     private Long id;
     private String name;
-    private Double alcohol;
-    private String imageLink;
+    private Double volume;
+    private String imageUrl;
     private String category;
 
     // Getters and Setters
@@ -25,20 +25,20 @@ public class LiquorDTO {
         this.name = name;
     }
 
-    public Double getAlcohol() {
-        return alcohol;
+    public Double getVolume() {
+        return volume;
     }
 
-    public void setAlcohol(Double alcohol) {
-        this.alcohol = alcohol;
+    public void setVolume(Double volume) {
+        this.volume = volume;
     }
 
-    public String getImageLink() {
-        return imageLink;
+    public String getImageUrl() {
+        return imageUrl;
     }
 
-    public void setImageLink(String imageLink) {
-        this.imageLink = imageLink;
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 
     public String getCategory() {
