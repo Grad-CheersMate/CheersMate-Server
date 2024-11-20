@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 public class FoodDTO {
     private Long id;
     private String name;
-    private String imageLink;
+    private String imageUrl;
     private String category;
 
     // Food Entity를 FoodDTO로 변환하는 메서드
@@ -24,7 +24,7 @@ public class FoodDTO {
                 .id(food.getFoodId())
                 .name(food.getName())
                 .category(food.getCategory())
-                .imageLink(food.getImageLink())
+                .imageUrl(food.getImageLink())
                 .build();
     }
 }
