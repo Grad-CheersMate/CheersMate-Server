@@ -41,8 +41,8 @@ public class LiquorService {
         if (liquorOptional.isPresent()) {
             Liquor liquor = liquorOptional.get();
             liquor.setName(liquorDTO.getName());
-            liquor.setAlcohol(liquorDTO.getAlcohol());
-            liquor.setImageLink(liquorDTO.getImageLink());
+            liquor.setAlcohol(liquorDTO.getVolume());
+            liquor.setImageLink(liquorDTO.getImageUrl());
             liquor.setCategory(liquorDTO.getCategory());
             liquor = liquorRepository.save(liquor);
             return convertToDTO(liquor);
@@ -58,8 +58,8 @@ public class LiquorService {
         LiquorDTO dto = new LiquorDTO();
         dto.setId(liquor.getId());
         dto.setName(liquor.getName());
-        dto.setAlcohol(liquor.getAlcohol());
-        dto.setImageLink(liquor.getImageLink());
+        dto.setVolume(liquor.getAlcohol());
+        dto.setImageUrl(liquor.getImageLink());
         dto.setCategory(liquor.getCategory());
         return dto;
     }
@@ -67,8 +67,8 @@ public class LiquorService {
     private Liquor convertToEntity(LiquorDTO liquorDTO) {
         Liquor liquor = new Liquor();
         liquor.setName(liquorDTO.getName());
-        liquor.setAlcohol(liquorDTO.getAlcohol());
-        liquor.setImageLink(liquorDTO.getImageLink());
+        liquor.setAlcohol(liquorDTO.getVolume());
+        liquor.setImageLink(liquorDTO.getImageUrl());
         liquor.setCategory(liquorDTO.getCategory());
         return liquor;
     }
