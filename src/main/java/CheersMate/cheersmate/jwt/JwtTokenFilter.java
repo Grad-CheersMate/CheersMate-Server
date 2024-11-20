@@ -38,7 +38,6 @@ public class JwtTokenFilter extends OncePerRequestFilter {
                 path.startsWith("/users/emailFind") ||
                 path.startsWith("/users/passFind") ||
                 path.startsWith("/users/passReset") ||
-                path.startsWith("/login/") ||
                 path.startsWith("/swagger-ui/") ||
                 path.startsWith("/weather") ||
                 path.startsWith("/batch/start")||

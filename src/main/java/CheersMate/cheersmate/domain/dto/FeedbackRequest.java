@@ -1,8 +1,5 @@
 package CheersMate.cheersmate.domain.dto;
 
-import CheersMate.cheersmate.domain.enums.Companion;
-import CheersMate.cheersmate.domain.enums.Emotion;
-
 public class FeedbackRequest {
 
     private String emotion;

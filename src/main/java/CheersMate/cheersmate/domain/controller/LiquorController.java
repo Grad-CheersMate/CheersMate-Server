@@ -1,6 +1,5 @@
 package CheersMate.cheersmate.domain.controller;
 
-
 import CheersMate.cheersmate.domain.dto.LiquorDTO;
 import CheersMate.cheersmate.domain.service.LiquorService;
 import CheersMate.cheersmate.jwt.JwtTokenUtil;
