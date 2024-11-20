@@ -1,6 +1,7 @@
 package CheersMate.cheersmate.config;
 
 import jakarta.persistence.EntityManagerFactory;
+import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
@@ -19,14 +20,10 @@ import javax.sql.DataSource;
 @Configuration
 @EnableBatchProcessing
 @EnableTransactionManagement
+@RequiredArgsConstructor
 public class BatchConfig {
     private final EntityManagerFactory entityManagerFactory;
     private final DataSource dataSource;
-
-    public BatchConfig(EntityManagerFactory entityManagerFactory, DataSource dataSource) {
-        this.entityManagerFactory = entityManagerFactory;
-        this.dataSource = dataSource;
-    }
 
     @Bean
     public PlatformTransactionManager transactionManager() {

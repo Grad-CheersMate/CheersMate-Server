@@ -2,6 +2,7 @@ package CheersMate.cheersmate.config;
 
 import CheersMate.cheersmate.domain.entity.Liquor;
 import jakarta.persistence.EntityManagerFactory;
+import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
@@ -11,26 +12,21 @@ import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper;
 import org.springframework.batch.item.file.mapping.DefaultLineMapper;
 import org.springframework.batch.item.file.transform.DelimitedLineTokenizer;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.transaction.PlatformTransactionManager;
 
-
 @Configuration
+@RequiredArgsConstructor
 public class LiquorBatchConfig {
-    @Autowired
-    private JobBuilderFactory jobBuilderFactory;
+    private final JobBuilderFactory jobBuilderFactory;
 
-    @Autowired
-    private StepBuilderFactory stepBuilderFactory;
+    private final StepBuilderFactory stepBuilderFactory;
 
-    @Autowired
-    private PlatformTransactionManager transactionManager;
+    private final PlatformTransactionManager transactionManager;
 
-    @Autowired
-    private EntityManagerFactory entityManagerFactory;
+    private final EntityManagerFactory entityManagerFactory;
 
     @Bean
     public FlatFileItemReader<Liquor> liquorReader() {
@@ -38,7 +34,7 @@ public class LiquorBatchConfig {
         reader.setResource(new ClassPathResource("all_liquor_data.csv"));
         reader.setLinesToSkip(1);
         reader.setEncoding("UTF-8");
-        reader.setLineMapper(new DefaultLineMapper<Liquor>() {{
+        reader.setLineMapper(new DefaultLineMapper<>() {{
             setLineTokenizer(new DelimitedLineTokenizer() {{
                 setNames("name", "alcohol", "image_link", "category");
             }});

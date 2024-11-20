@@ -10,6 +10,8 @@ import CheersMate.cheersmate.domain.repository.FeedbackRepository;
 import CheersMate.cheersmate.domain.repository.LiquorRepository;
 import CheersMate.cheersmate.weather.entity.WeatherData;
 import CheersMate.cheersmate.weather.repository.WeatherDataRepository;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.*;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.stereotype.Service;
@@ -18,7 +20,9 @@ import org.springframework.web.client.RestTemplate;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class RecommendationService {
@@ -295,5 +299,86 @@ public class RecommendationService {
             default:
                 return 0; // 기본값 설정
         }
+    }
+
+    public FeedbackStatisticsDTO getFeedbackStatistics() {
+        List<Feedback> feedbacks = feedbackRepository.findAll();
+
+        // 감정별 평균 점수 계산
+        Map<String, Double> emotionStats = feedbacks.stream()
+                .collect(Collectors.groupingBy(
+                        feedback -> convertEmotion(feedback.getEmotion()), // 감정을 사람이 읽을 수 있는 값으로 변환
+                        Collectors.averagingDouble(Feedback::getRating)   // 각 그룹의 평균 점수 계산
+                ));
+
+        // 날씨별 평균 점수 계산
+        Map<String, Double> weatherStats = feedbacks.stream()
+                .collect(Collectors.groupingBy(
+                        feedback -> convertWeatherCondition(feedback.getWeatherCondition()), // 날씨를 사람이 읽을 수 있는 값으로 변환
+                        Collectors.averagingDouble(Feedback::getRating)                      // 각 그룹의 평균 점수 계산
+                ));
+
+        // 동반자별 평균 점수 계산
+        Map<String, Double> companionStats = feedbacks.stream()
+                .collect(Collectors.groupingBy(
+                        feedback -> convertCompanion(feedback.getCompanion()), // 동반자를 사람이 읽을 수 있는 값으로 변환
+                        Collectors.averagingDouble(Feedback::getRating)       // 각 그룹의 평균 점수 계산
+                ));
+
+        // Calculate average rating
+        double averageRating = feedbacks.stream()
+                .mapToInt(Feedback::getRating)
+                .average()
+                .orElse(0.0);
+
+        // Return as DTO
+        return new FeedbackStatisticsDTO(averageRating, weatherStats, emotionStats, companionStats);
+    }
+
+    private String convertWeatherCondition(int code) {
+        switch (code) {
+            case 0: return "맑음";
+            case 1: return "비";
+            case 2: return "눈";
+            case 3: return "흐림";
+            case 4: return "더운 날";
+            case 5: return "추운 날";
+            case 6: return "바람 부는 날";
+            default: return "알 수 없음";
+        }
+    }
+
+    private String convertEmotion(int code) {
+        for (Emotion emotion : Emotion.values()) {
+            if (emotion.getCode() == code) {
+                return emotion.name();
+            }
+        }
+        return "알 수 없음";
+    }
+
+    private String convertCompanion(int code) {
+        for (Companion companion : Companion.values()) {
+            if (companion.getCode() == code) {
+                return companion.name();
+            }
+        }
+        return "알 수 없음";
+    }
+
+    public List<RatingDTO> getTopRatedLiquors() {
+        Pageable top20 = PageRequest.of(0, 20); // 상위 20개 페이징
+        List<Object[]> results = feedbackRepository.findTopRatedLiquors(top20);
+
+        // Object[] 데이터를 LiquorDTO로 변환하고 RatingDTO로 감싸기
+        return results.stream()
+                .map(row -> {
+                    LiquorDTO liquor = new LiquorDTO();
+                    liquor.setId((Long) row[0]);          // liquorId
+                    liquor.setName((String) row[1]);      // liquorName
+                    liquor.setImageLink((String) row[2]); // liquorImage
+                    return new RatingDTO(liquor); // LiquorDTO를 감싸기
+                })
+                .collect(Collectors.toList());
     }
 }

@@ -4,6 +4,9 @@ import CheersMate.cheersmate.domain.dto.FoodDTO;
 import CheersMate.cheersmate.domain.entity.Food;
 import CheersMate.cheersmate.domain.repository.FoodRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,7 +25,7 @@ public class FoodService {
             FoodDTO dto = new FoodDTO();
             dto.setId(food.getFoodId());
             dto.setName(food.getName());
-            dto.setImageLink(food.getImageLink());
+            dto.setImageUrl(food.getImageLink());
             dto.setCategory(food.getCategory());
             return dto;
         }).collect(Collectors.toList());
@@ -37,7 +40,7 @@ public class FoodService {
         FoodDTO dto = new FoodDTO();
         dto.setId(food.getFoodId());
         dto.setName(food.getName());
-        dto.setImageLink(food.getImageLink());
+        dto.setImageUrl(food.getImageLink());
         dto.setCategory(food.getCategory());
         return dto;
     }
@@ -48,7 +51,7 @@ public class FoodService {
             FoodDTO dto = new FoodDTO();
             dto.setId(food.getFoodId());
             dto.setName(food.getName());
-            dto.setImageLink(food.getImageLink());
+            dto.setImageUrl(food.getImageLink());
             dto.setCategory(food.getCategory());
             return dto;
         }).collect(Collectors.toList());
@@ -59,7 +62,7 @@ public class FoodService {
     public void addFood(FoodDTO foodDTO) {
         Food food = new Food();
         food.setName(foodDTO.getName());
-        food.setImageLink(foodDTO.getImageLink());
+        food.setImageLink(foodDTO.getImageUrl());
         food.setCategory(foodDTO.getCategory());
 
         foodRepository.save(food);
@@ -72,7 +75,7 @@ public class FoodService {
                 .orElseThrow(() -> new IllegalArgumentException("Invalid food ID"));
 
         food.setName(foodDTO.getName());
-        food.setImageLink(foodDTO.getImageLink());
+        food.setImageLink(foodDTO.getImageUrl());
         food.setCategory(foodDTO.getCategory()); // category는 String 타입
 
         foodRepository.save(food);
@@ -82,5 +85,10 @@ public class FoodService {
     @Transactional
     public void deleteFood(Long foodId) {
         foodRepository.deleteById(foodId);
+    }
+
+    public Page<FoodDTO> getFoodsWithPaging(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return foodRepository.findAll(pageable).map(FoodDTO::fromEntity);
     }
 }
