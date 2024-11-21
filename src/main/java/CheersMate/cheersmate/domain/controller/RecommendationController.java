@@ -51,7 +51,7 @@ public class RecommendationController {
     @GetMapping("/recommend/rating")
     public ResponseEntity<?> getTopRatedLiquors() {
         List<RatingDTO> ratings = recommendationService.getTopRatedLiquors();
-        log.info("{\"result\": 1, \"httpCode\": 200, \"ratings\": {}}", ratings);
+        log.info("{\"result\": 1, \"httpCode\": 200, \"data\": {}}", ratings);
         return ResponseEntity.ok(new RatingResponse(true, 200, ratings));
     }
 }

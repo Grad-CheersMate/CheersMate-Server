@@ -20,7 +20,6 @@ import org.springframework.web.client.RestTemplate;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -340,18 +339,18 @@ public class RecommendationService {
     }
 
     public List<RatingDTO> getTopRatedLiquors() {
-        Pageable top20 = PageRequest.of(0, 20); // 상위 20개 페이징
-        List<Object[]> results = feedbackRepository.findTopRatedLiquors(top20);
+        Pageable top30 = PageRequest.of(0, 30); // 상위 30개 페이징
+        List<Object[]> results = feedbackRepository.findTopRatedLiquors(top30);
 
-        // Object[] 데이터를 LiquorDTO로 변환하고 RatingDTO로 감싸기
+        // Object[] 데이터를 직접 RatingDTO로 변환
         return results.stream()
-                .map(row -> {
-                    LiquorDTO liquor = new LiquorDTO();
-                    liquor.setId((Long) row[0]);          // liquorId
-                    liquor.setName((String) row[1]);      // liquorName
-                    liquor.setImageUrl((String) row[2]); // liquorImage
-                    return new RatingDTO(liquor); // LiquorDTO를 감싸기
-                })
+                .map(row -> new RatingDTO(
+                        (Long) row[0],          // liquorId
+                        (String) row[1],        // liquorName
+                        (Double) row[2],        // volume
+                        (String) row[3],        // imageUrl
+                        (String) row[4]         // type
+                ))
                 .collect(Collectors.toList());
     }
 }
