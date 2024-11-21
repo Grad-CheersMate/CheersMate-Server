@@ -60,12 +60,20 @@
         <div id="feedbackCharts">
             <h3>피드백 통계</h3>
             <p id="averageRating"></p>
-            <h4>날씨별 피드백</h4>
-            <canvas id="weatherChart"></canvas>
-            <h4>감정별 피드백</h4>
-            <canvas id="emotionChart"></canvas>
-            <h4>동반자별 피드백</h4>
-            <canvas id="companionChart"></canvas>
+            <canvas id="feedbackChart"></canvas>
+            <div class="chart-description">
+                <strong>차트 설명:</strong>
+                <ul>
+                    <li>X축: 감정(Emotion)과 날씨(Weather) 조합</li>
+                    <li>Y축: 피드백의 개수</li>
+                    <li>
+                        막대 색상:
+                        <span style="color: green;">녹색(Green)</span>: 긍정적 피드백 (Positive),
+                        <span style="color: red;">빨간색(Red)</span>: 부정적 피드백 (Negative)
+                    </li>
+                    <li>특정 조합에서 긍정적 피드백과 부정적 피드백의 비율을 확인 가능</li>
+                </ul>
+            </div>
         </div>
     </div>
 </div>
@@ -212,10 +220,10 @@
             <tr>
                 <td>${liquor.id || ''}</td>
                 <td>${liquor.name || ''}</td>
-                <td>${liquor.alcohol || ''}</td>
+                <td>${liquor.volume || ''}</td>
                 <td>${liquor.category || ''}</td>
                 <td>
-                    ${liquor.imageLink ? `<a href="${liquor.imageLink}" target="_blank">이미지 보기</a>` : ''}
+                    ${liquor.imageUrl ? `<a href="${liquor.imageUrl}" target="_blank">이미지 보기</a>` : ''}
                     <button class="btn btn-warning btn-sm" onclick="editLiquor(${liquor.id})">수정</button>
                     <button class="btn btn-danger btn-sm" onclick="deleteLiquor(${liquor.id})">삭제</button>
                 </td>
@@ -237,7 +245,7 @@
                 <td>${food.name || ''}</td>
                 <td>${food.category || ''}</td>
                 <td>
-                    ${food.imageLink ? `<a href="${food.imageLink}" target="_blank">이미지 보기</a>` : ''}
+                    ${food.imageUrl ? `<a href="${food.imageUrl}" target="_blank">이미지 보기</a>` : ''}
                     <button class="btn btn-warning btn-sm" onclick="editFood(${food.id})">수정</button>
                     <button class="btn btn-danger btn-sm" onclick="deleteFood(${food.id})">삭제</button>
                 </td>
@@ -251,97 +259,60 @@
     const chartInstances = {};
 
     // 피드백 통계 렌더링
-    function renderFeedbackStatistics(stats) {
-        const { averageRating, weatherStats, emotionStats, companionStats } = stats;
-
-        document.getElementById('averageRating').textContent = `평균 평가 점수: ${averageRating.toFixed(2)}`;
-
-        // 기존 차트를 삭제
-        destroyChart('weatherChart');
-        destroyChart('emotionChart');
-        destroyChart('companionChart');
-
-        // 각 통계에 맞는 색상 배열을 전달
-        renderChart(
-            'weatherChart',
-            '날씨별 피드백',
-            weatherStats,
-            [
-                'rgba(255, 99, 132, 0.2)', 'rgba(255, 159, 64, 0.2)',
-                'rgba(255, 205, 86, 0.2)', 'rgba(75, 192, 192, 0.2)',
-                'rgba(54, 162, 235, 0.2)', 'rgba(153, 102, 255, 0.2)'
-            ],
-            [
-                'rgba(255, 99, 132, 1)', 'rgba(255, 159, 64, 1)',
-                'rgba(255, 205, 86, 1)', 'rgba(75, 192, 192, 1)',
-                'rgba(54, 162, 235, 1)', 'rgba(153, 102, 255, 1)'
-            ]
-        );
-
-        renderChart(
-            'emotionChart',
-            '감정별 피드백',
-            emotionStats,
-            [
-                'rgba(54, 162, 235, 0.2)', 'rgba(153, 102, 255, 0.2)',
-                'rgba(75, 192, 192, 0.2)', 'rgba(201, 203, 207, 0.2)'
-            ],
-            [
-                'rgba(54, 162, 235, 1)', 'rgba(153, 102, 255, 1)',
-                'rgba(75, 192, 192, 1)', 'rgba(201, 203, 207, 1)'
-            ]
-        );
-
-        renderChart(
-            'companionChart',
-            '동반자별 피드백',
-            companionStats,
-            [
-                'rgba(255, 99, 132, 0.2)', 'rgba(255, 205, 86, 0.2)',
-                'rgba(75, 192, 192, 0.2)', 'rgba(153, 102, 255, 0.2)',
-                'rgba(54, 162, 235, 0.2)'
-            ],
-            [
-                'rgba(255, 99, 132, 1)', 'rgba(255, 205, 86, 1)',
-                'rgba(75, 192, 192, 1)', 'rgba(153, 102, 255, 1)',
-                'rgba(54, 162, 235, 1)'
-            ]
-        );
-    }
-
-    function renderChart(canvasId, chartTitle, data, bgColorArray, borderColorArray) {
-        const ctx = document.getElementById(canvasId).getContext('2d');
-        const labels = Object.keys(data).map(key => `${key}`);
-        const values = Object.values(data);
-
-        // 기존 차트가 있으면 삭제
-        if (chartInstances[canvasId]) {
-            chartInstances[canvasId].destroy();
+    function renderFeedbackStatistics(data) {
+        // 데이터 검증
+        if (!data || !data.combinations || data.combinations.length === 0) {
+            console.error('피드백 데이터가 비어 있습니다.');
+            return;
         }
 
+        const ctx = document.getElementById('feedbackChart').getContext('2d');
+        const labels = data.combinations.map(comb => `(${comb.emotion}, ${comb.weatherCondition})`);
+        const positiveData = data.combinations.map(comb => comb.positiveCount);
+        const negativeData = data.combinations.map(comb => comb.negativeCount);
+
+        // 기존 차트가 있다면 삭제
+        destroyChart('feedbackChart');
+
         // 새로운 차트 생성 및 저장
-        chartInstances[canvasId] = new Chart(ctx, {
+        chartInstances['feedbackChart'] = new Chart(ctx, {
             type: 'bar',
             data: {
                 labels: labels,
-                datasets: [{
-                    label: chartTitle,
-                    data: values,
-                    backgroundColor: bgColorArray,
-                    borderColor: borderColorArray,
-                    borderWidth: 1
-                }]
+                datasets: [
+                    {
+                        label: 'Positive',
+                        data: positiveData,
+                        backgroundColor: 'rgba(75, 192, 192, 0.8)',
+                    },
+                    {
+                        label: 'Negative',
+                        data: negativeData,
+                        backgroundColor: 'rgba(255, 99, 132, 0.8)',
+                    },
+                ],
             },
             options: {
                 responsive: true,
-                plugins: {
-                    legend: { position: 'top' },
-                    title: { display: true, text: chartTitle }
-                },
                 scales: {
-                    y: { beginAtZero: true }
-                }
-            }
+                    x: {
+                        stacked: true,
+                    },
+                    y: {
+                        stacked: true,
+                        beginAtZero: true,
+                    },
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Feedback Count by Emotion and Weather',
+                    },
+                },
+            },
         });
     }
 
@@ -352,7 +323,6 @@
             chartInstances[canvasId] = null; // 인스턴스를 초기화
         }
     }
-
 
     function renderPagination(totalPages, currentPage, apiUrl, token, renderTableFn, dataKey) {
         const paginationContainer = document.getElementById('pagination');

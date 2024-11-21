@@ -14,4 +14,11 @@ public interface FeedbackRepository extends JpaRepository<Feedback, Long> {
             "GROUP BY f.liquor.id, f.liquor.name, f.liquor.imageLink " +
             "ORDER BY AVG(f.rating) DESC")
     List<Object[]> findTopRatedLiquors(Pageable pageable);
+
+    @Query("SELECT f.emotion, f.weatherCondition, " +
+            "SUM(CASE WHEN f.rating >= 3 THEN 1 ELSE 0 END) AS positiveCount, " +
+            "SUM(CASE WHEN f.rating < 3 THEN 1 ELSE 0 END) AS negativeCount " +
+            "FROM Feedback f " +
+            "GROUP BY f.emotion, f.weatherCondition")
+    List<Object[]> getFeedbackStatistics();
 }

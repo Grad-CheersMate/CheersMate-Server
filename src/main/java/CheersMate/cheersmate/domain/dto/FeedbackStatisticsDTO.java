@@ -2,14 +2,24 @@ package CheersMate.cheersmate.domain.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import java.util.Map;
+import java.util.List;
 
 @Data
+@NoArgsConstructor
 @AllArgsConstructor
 public class FeedbackStatisticsDTO {
-    private double averageRating; // 평균 평점
-    private Map<String, Double> weatherStats; // 날씨 조건 통계
-    private Map<String, Double> emotionStats; // 감정 통계
-    private Map<String, Double> companionStats; // 동반자 통계
+
+    private List<FeedbackCombinationDTO> combinations;
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class FeedbackCombinationDTO {
+        private String emotion;
+        private String weatherCondition;
+        private Long positiveCount;
+        private Long negativeCount;
+    }
 }
