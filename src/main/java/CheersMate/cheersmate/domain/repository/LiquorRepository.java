@@ -4,9 +4,11 @@ import CheersMate.cheersmate.domain.entity.Liquor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
+@Repository
 public interface LiquorRepository extends JpaRepository<Liquor, Long> {
     Page<Liquor> findByCategory(String category, Pageable pageable);
     Liquor findByNameAndCategoryAndAlcohol(String name, String category, Double alcohol);

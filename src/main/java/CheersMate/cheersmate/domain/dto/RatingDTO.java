@@ -6,5 +6,9 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RatingDTO {
-    private LiquorDTO liquor;
+    private Long id;
+    private String name;
+    private Double volume;
+    private String imageUrl;
+    private String type;
 }
