@@ -10,6 +10,8 @@ import CheersMate.cheersmate.domain.repository.FeedbackRepository;
 import CheersMate.cheersmate.domain.repository.LiquorRepository;
 import CheersMate.cheersmate.weather.entity.WeatherData;
 import CheersMate.cheersmate.weather.repository.WeatherDataRepository;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.*;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.stereotype.Service;
@@ -19,6 +21,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class RecommendationService {
@@ -296,5 +299,59 @@ public class RecommendationService {
             default:
                 return 0; // 기본값 설정
         }
+    }
+
+    public FeedbackStatisticsDTO getFeedbackStatistics() {
+        List<Object[]> statistics = feedbackRepository.getFeedbackStatistics();
+
+        // DTO로 변환
+        List<FeedbackStatisticsDTO.FeedbackCombinationDTO> combinations = statistics.stream()
+                .map(row -> new FeedbackStatisticsDTO.FeedbackCombinationDTO(
+                        convertEmotion((Integer) row[0]),          // 감정 코드 변환
+                        convertWeatherCondition((Integer) row[1]), // 날씨 코드 변환
+                        (Long) row[2],                             // positiveCount
+                        (Long) row[3]                              // negativeCount
+                ))
+                .toList();
+
+        return new FeedbackStatisticsDTO(combinations);
+    }
+
+    private String convertWeatherCondition(int code) {
+        return switch (code) {
+            case 0 -> "sunny";
+            case 1 -> "rainy";
+            case 2 -> "snowy";
+            case 3 -> "cloudy";
+            case 4 -> "hot";
+            case 5 -> "cold";
+            case 6 -> "windy";
+            default -> "undefined";
+        };
+    }
+
+    private String convertEmotion(int code) {
+        for (Emotion emotion : Emotion.values()) {
+            if (emotion.getCode() == code) {
+                return emotion.name();
+            }
+        }
+        return "알 수 없음";
+    }
+
+    public List<RatingDTO> getTopRatedLiquors() {
+        Pageable top30 = PageRequest.of(0, 30); // 상위 30개 페이징
+        List<Object[]> results = feedbackRepository.findTopRatedLiquors(top30);
+
+        // Object[] 데이터를 직접 RatingDTO로 변환
+        return results.stream()
+                .map(row -> new RatingDTO(
+                        (Long) row[0],          // liquorId
+                        (String) row[1],        // liquorName
+                        (Double) row[2],        // volume
+                        (String) row[3],        // imageUrl
+                        (String) row[4]         // type
+                ))
+                .collect(Collectors.toList());
     }
 }

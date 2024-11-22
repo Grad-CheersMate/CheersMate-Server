@@ -1,6 +1,5 @@
 package CheersMate.cheersmate.weather.controller;
 
-
 import CheersMate.cheersmate.response.ApiResponse;
 import CheersMate.cheersmate.response.WeathersResponse;
 import CheersMate.cheersmate.weather.entity.WeatherData;

@@ -1,6 +1,5 @@
 package CheersMate.cheersmate.weather.service;
 
-
 import CheersMate.cheersmate.weather.entity.WeatherData;
 import CheersMate.cheersmate.weather.repository.WeatherDataRepository;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -262,7 +260,6 @@ public class WeatherService {
             default: return "알 수 없음";
         }
     }
-
 
     //가장 최근 날씨 데이터 조회
     public WeatherData getLatestWeatherData() {

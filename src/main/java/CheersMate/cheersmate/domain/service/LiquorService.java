@@ -1,10 +1,9 @@
 package CheersMate.cheersmate.domain.service;
 
-
 import CheersMate.cheersmate.domain.dto.LiquorDTO;
 import CheersMate.cheersmate.domain.entity.Liquor;
 import CheersMate.cheersmate.domain.repository.LiquorRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -15,10 +14,10 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class LiquorService {
 
-    @Autowired
-    private LiquorRepository liquorRepository;
+    private final LiquorRepository liquorRepository;
 
     public List<LiquorDTO> getAllLiquors() {
         return liquorRepository.findAll().stream()
@@ -30,13 +29,13 @@ public class LiquorService {
         return liquorRepository.findById(id).map(this::convertToDTO);
     }
 
-    public LiquorDTO createLiquor(LiquorDTO liquorDTO) {
+    public void createLiquor(LiquorDTO liquorDTO) {
         Liquor liquor = convertToEntity(liquorDTO);
         liquor = liquorRepository.save(liquor);
-        return convertToDTO(liquor);
+        convertToDTO(liquor);
     }
 
-    public LiquorDTO updateLiquor(Long id, LiquorDTO liquorDTO) {
+    public void updateLiquor(Long id, LiquorDTO liquorDTO) {
         Optional<Liquor> liquorOptional = liquorRepository.findById(id);
         if (liquorOptional.isPresent()) {
             Liquor liquor = liquorOptional.get();
@@ -45,9 +44,8 @@ public class LiquorService {
             liquor.setImageLink(liquorDTO.getImageUrl());
             liquor.setCategory(liquorDTO.getCategory());
             liquor = liquorRepository.save(liquor);
-            return convertToDTO(liquor);
+            convertToDTO(liquor);
         }
-        return null;
     }
 
     public void deleteLiquor(Long id) {
@@ -82,5 +80,10 @@ public class LiquorService {
     public Page<LiquorDTO> searchLiquors(String keyword, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         return liquorRepository.findByNameContaining(keyword, pageable).map(this::convertToDTO);
+    }
+
+    public Page<LiquorDTO> getLiquorsWithPaging(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return liquorRepository.findAll(pageable).map(this::convertToDTO);
     }
 }
