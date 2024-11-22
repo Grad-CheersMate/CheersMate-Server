@@ -262,7 +262,8 @@ public class RecommendationService {
 
             similarLiquor.setName(flaskSimilarItem.getName());
             similarLiquor.setImageUrl(flaskSimilarItem.getImageUrl());
-            // 필요한 경우 다른 필드도 설정
+            similarLiquor.setVolume(flaskSimilarItem.getVolume());
+            similarLiquor.setType(flaskSimilarItem.getType());
 
             frontendSimilarItem.setLiquor(similarLiquor);
             frontendSimilarList.add(frontendSimilarItem);
