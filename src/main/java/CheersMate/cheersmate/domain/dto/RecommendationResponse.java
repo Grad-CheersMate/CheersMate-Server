@@ -185,6 +185,8 @@ public class RecommendationResponse {
     public static class SimilarItem {
         private String name;
         private String imageUrl;
+        private double volume;
+        private String type;
 
         // Getters and Setters
 
@@ -202,6 +204,22 @@ public class RecommendationResponse {
 
         public void setImageUrl(String imageUrl) {
             this.imageUrl = imageUrl;
+        }
+
+        public double getVolume() {
+            return volume;
+        }
+
+        public void setVolume(double volume) {
+            this.volume = volume;
+        }
+
+        public String getType() {
+            return type;
+        }
+
+        public void setType(String type) {
+            this.type = type;
         }
     }
 }
