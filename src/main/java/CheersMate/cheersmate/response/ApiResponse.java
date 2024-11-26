@@ -18,6 +18,12 @@ public class ApiResponse {
         this.httpCode = httpCode;
     }
 
+    public ApiResponse(boolean result, int httpCode, String accessToken) {
+        this.result = result;
+        this.httpCode = httpCode;
+        this.accessToken = accessToken;
+    }
+
     public ApiResponse(boolean result, int httpCode, String accessToken, String refreshToken) {
         this.result = result;
         this.httpCode = httpCode;

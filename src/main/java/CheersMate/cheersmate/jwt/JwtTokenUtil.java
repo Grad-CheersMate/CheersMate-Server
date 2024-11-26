@@ -4,6 +4,7 @@ import CheersMate.cheersmate.users.entity.Users;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -13,6 +14,7 @@ import java.util.Date;
 import java.util.function.Function;
 
 @Component
+@Slf4j
 public class JwtTokenUtil {
     @Value("${jwt.secret}")
     private String secret;
@@ -35,7 +37,7 @@ public class JwtTokenUtil {
         return Jwts.builder()
                 .setSubject(user.getEmail())
                 .claim("role", user.getRole().name())
-                .setIssuer("ToDoIt")
+                .setIssuer("CheersMate")
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + accessExpiration))
                 .signWith(key)
@@ -43,11 +45,13 @@ public class JwtTokenUtil {
     }
 
     public String generateRefreshToken(Users user) {
+        long expiration = System.currentTimeMillis() + refreshExpiration;
+        log.info("Refresh Token expiration set to: {}", new Date(expiration));
         return Jwts.builder()
                 .setSubject(user.getEmail())
-                .setIssuer("ToDoIt")
+                .setIssuer("CheersMate")
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + refreshExpiration))
+                .setExpiration(new Date(expiration))
                 .signWith(key)
                 .compact();
     }

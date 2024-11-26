@@ -4,6 +4,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,16 +18,12 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 @Component
+@AllArgsConstructor
 public class JwtTokenFilter extends OncePerRequestFilter {
     private static final Logger log = LoggerFactory.getLogger(JwtTokenFilter.class);
 
     private final JwtTokenUtil jwtTokenUtil;
     private final UserDetailsService userDetailsService;
-
-    public JwtTokenFilter(JwtTokenUtil jwtTokenUtil, UserDetailsService userDetailsService) {
-        this.jwtTokenUtil = jwtTokenUtil;
-        this.userDetailsService = userDetailsService;
-    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -45,7 +42,8 @@ public class JwtTokenFilter extends OncePerRequestFilter {
                 path.startsWith("/js/") ||
                 path.startsWith("/images/") ||
                 path.equals("/auth/home") ||
-                path.equals("/auth/login")) {
+                path.equals("/auth/login") ||
+                path.equals("/auth/refresh")) {
             // Skip token validation for these paths
             filterChain.doFilter(request, response);
             return;
@@ -57,7 +55,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json");
             PrintWriter writer = response.getWriter();
-            writer.write("{\"result\": 0, \"resultCode\": 401, \"message\": \"Missing or invalid Authorization header\"}");
+            writer.write("{\"result\": 0, \"httpCode\": 401, \"message\": \"Missing or invalid Authorization header\"}");
             writer.flush();
             return;
         }
@@ -69,7 +67,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 response.setContentType("application/json");
                 PrintWriter writer = response.getWriter();
-                writer.write("{\"result\": 0, \"resultCode\": 401, \"message\": \"Token expired\"}");
+                writer.write("{\"result\": 0, \"httpCode\": 401, \"message\": \"Token expired\"}");
                 writer.flush();
                 return;
             }
@@ -78,7 +76,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401 Unauthorized
             response.setContentType("application/json");
             PrintWriter writer = response.getWriter();
-            writer.write(String.format("{\"result\": 0, \"resultCode\": 401, \"message\": \"%s\"}", e.getMessage()));
+            writer.write(String.format("{\"result\": 0, \"httpCode\": 401, \"message\": \"%s\"}", e.getMessage()));
             writer.flush();
             return;
         }
