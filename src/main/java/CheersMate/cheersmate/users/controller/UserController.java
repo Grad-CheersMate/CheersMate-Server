@@ -10,15 +10,21 @@ import CheersMate.cheersmate.users.dto.LoginDTO;
 import CheersMate.cheersmate.users.dto.UserDTO;
 import CheersMate.cheersmate.users.entity.Role;
 import CheersMate.cheersmate.users.entity.Users;
+import CheersMate.cheersmate.users.service.TokenService;
 import CheersMate.cheersmate.users.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.Collections;
 
 @Slf4j
 @RestController
@@ -28,6 +34,10 @@ public class UserController {
     private final UserService userService;
     private final JwtTokenUtil jwtTokenUtil;
     private final PasswordEncoder passwordEncoder;
+    private final TokenService tokenService;
+
+    @Value("${jwt.refresh-expiration}")
+    private long refreshExpiration;
 
     // 사용자 데이터 페이징
     @GetMapping("/api/admin/users/page")
@@ -44,20 +54,84 @@ public class UserController {
         return ResponseEntity.ok(new UserResponse(true, 200, users));
     }
 
+    @PostMapping("/auth/refresh")
+    public ResponseEntity<?> refreshAccessToken(@RequestHeader("Authorization") String refreshToken) {
+        if (refreshToken == null || !refreshToken.startsWith("Bearer ")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Collections.singletonMap("message", "Missing or invalid refresh token"));
+        }
+
+        String token = refreshToken.substring(7);
+        String email = jwtTokenUtil.getEmail(token);
+
+        log.info("Received refresh token for email: {}", email);
+
+        // Refresh Token 검증
+        if (!tokenService.validateRefreshToken(email, token)) {
+            log.info("Refresh Token validation failed for email: {}", email);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Collections.singletonMap("message", "Invalid or expired refresh token"));
+        }
+
+        Users user = userService.findUserByEmail(email);
+        if (user == null) {
+            log.info("User not found for email: {}", email);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Collections.singletonMap("message", "User not found"));
+        }
+
+        String newAccessToken = jwtTokenUtil.generateAccessToken(user);
+        log.info("New Access Token issued for email: {}", email);
+
+        log.info("{\"result\": 1, \"httpCode\": 200, \"newAccessToken\": \"{}\"}", newAccessToken);
+        return ResponseEntity.ok(new ApiResponse(true, 200, newAccessToken));
+    }
+
     @PostMapping("/users/login")
     public ResponseEntity<?> loginUser(@RequestBody LoginDTO request) {
-        log.info("Received login request with email: {} and password: {}", request.getEmail(), request.getPassword());
         Users user = userService.login(request.getEmail(), request.getPassword());
 
         if (user != null) {
             String accessToken = jwtTokenUtil.generateAccessToken(user);
             String refreshToken = jwtTokenUtil.generateRefreshToken(user);
 
+            // Refresh Token 저장
+            LocalDateTime expirationTime = LocalDateTime.now()
+                    .plus(refreshExpiration, ChronoUnit.MILLIS); // 7일
+            log.info("Refresh Token expiration set to: {}", expirationTime);
+
+            tokenService.saveRefreshToken(user.getEmail(), refreshToken, expirationTime);
+            log.info("Refresh Token saved for email {} with expiration time: {}", user.getEmail(), expirationTime);
+
             log.info("{\"result\": 1, \"httpCode\": 200, \"accessToken\": \"{}\", \"refreshToken\": \"{}\"}", accessToken, refreshToken);
-            return ResponseEntity.ok(new ApiResponse(true,200, accessToken, refreshToken));
+            return ResponseEntity.ok(new ApiResponse(true, 200, accessToken, refreshToken));
         } else {
             log.info("{\"result\": 0, \"httpCode\": 600}");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponse(false,600));
+        }
+    }
+
+    @PostMapping("/users/logout")
+    public ResponseEntity<?> logoutUser(@RequestHeader("Authorization") String token) {
+        try {
+            // Bearer 토큰에서 실제 토큰 값 추출
+            String email = jwtTokenUtil.extractUsername(token.substring(7));
+            log.info("Extracted email: {}", email);
+
+            // Refresh Token 삭제
+            if (tokenService.validateRefreshToken(email, token.substring(7))) {
+                tokenService.deleteRefreshToken(email);
+                log.info("Successfully deleted refresh token for email: {}", email);
+            } else {
+                log.error("Invalid refresh token for email: {}", email);
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Collections.singletonMap("message", "Invalid token"));
+            }
+
+            log.info("{\"result\": 1, \"httpCode\": 200}");
+            return ResponseEntity.ok(new ApiResponse(true, 200));
+        } catch (Exception e) {
+            log.error("Error during logout: {}", e.getMessage(), e);
+            return ResponseEntity.ok(new ApiResponse(false, 600));
         }
     }
 
