@@ -15,7 +15,9 @@ async function loginUser(event) {
 
         if (response.ok && result.accessToken) {
             const accessToken = result.accessToken;
+            const refreshToken = result.refreshToken;
             localStorage.setItem('accessToken', accessToken);  // JWT 토큰 저장
+            localStorage.setItem('refreshToken', refreshToken);
 
             // 토큰에서 ADMIN 역할을 확인
             const isAdmin = checkUserRole(accessToken);
@@ -24,6 +26,7 @@ async function loginUser(event) {
             } else {
                 alert("관리자 권한이 필요합니다.");
                 localStorage.removeItem('accessToken');  // 권한이 없을 경우 토큰 삭제
+                localStorage.removeItem('refreshToken');
             }
         } else {
             alert("로그인 실패! 이메일과 비밀번호를 확인하세요.");

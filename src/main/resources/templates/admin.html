@@ -20,7 +20,7 @@
 <body>
 
 <!-- 로그아웃 버튼 -->
-<a href="/auth/login" class="btn btn-outline-danger logout-btn" onclick="logout()">로그아웃</a>
+<a href="#" class="btn btn-outline-danger logout-btn" onclick="logout()">로그아웃</a>
 
 <div class="container mt-5">
     <h2 class="text-center">관리자 콘솔</h2>
@@ -82,8 +82,34 @@
 <script>
     // 로그아웃 기능
     function logout() {
-        localStorage.removeItem('accessToken');
-        window.location.href = '/auth/login';
+        const refreshToken = localStorage.getItem('refreshToken');
+        if (!refreshToken) {
+            alert('이미 로그아웃 되었습니다.');
+            window.location.href = '/auth/login';
+            return;
+        }
+
+        fetch('/users/logout', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${refreshToken}`
+            },
+        })
+            .then(response => {
+                if (!response.ok) throw new Error('로그아웃 실패');
+                return response.json();
+            })
+            .then(data => {
+                localStorage.removeItem('accessToken');
+                localStorage.removeItem('refreshToken');
+                alert('로그아웃 되었습니다.');
+                window.location.href = '/auth/login';
+            })
+            .catch(error => {
+                console.error(error);
+                alert('로그아웃 중 오류가 발생했습니다.');
+            });
     }
 
     // 카테고리별 로드 함수
