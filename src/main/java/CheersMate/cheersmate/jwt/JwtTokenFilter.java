@@ -16,11 +16,19 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.List;
 
 @Component
 @AllArgsConstructor
 public class JwtTokenFilter extends OncePerRequestFilter {
     private static final Logger log = LoggerFactory.getLogger(JwtTokenFilter.class);
+
+    // permitAll URL 목록을 상수로 관리 (필요에 따라 외부화 가능)
+    private static final List<String> EXCLUDED_PATHS = List.of(
+            "/users/login", "/users/register", "/users/emailFind",
+            "/users/passFind", "/users/passReset", "/swagger-ui/", "/v3/api-docs",
+            "/js/", "/images/", "/auth/home", "/auth/login", "/auth/refresh", "/weather", "/batch/start"
+    );
 
     private final JwtTokenUtil jwtTokenUtil;
     private final UserDetailsService userDetailsService;
@@ -30,33 +38,14 @@ public class JwtTokenFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
         String path = request.getRequestURI();
-        if (path.startsWith("/users/login") ||
-                path.startsWith("/users/register") ||
-                path.startsWith("/users/emailFind") ||
-                path.startsWith("/users/passFind") ||
-                path.startsWith("/users/passReset") ||
-                path.startsWith("/swagger-ui/") ||
-                path.startsWith("/weather") ||
-                path.startsWith("/batch/start")||
-                path.startsWith("/v3/api-docs") ||
-                path.startsWith("/js/") ||
-                path.startsWith("/images/") ||
-                path.equals("/auth/home") ||
-                path.equals("/auth/login") ||
-                path.equals("/auth/refresh")) {
-            // Skip token validation for these paths
+        if (EXCLUDED_PATHS.stream().anyMatch(path::startsWith)) {
             filterChain.doFilter(request, response);
             return;
         }
 
         String header = request.getHeader("Authorization");
         if (header == null || !header.startsWith("Bearer ")) {
-            log.warn("Missing or invalid Authorization header");
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.setContentType("application/json");
-            PrintWriter writer = response.getWriter();
-            writer.write("{\"result\": 0, \"httpCode\": 401, \"message\": \"Missing or invalid Authorization header\"}");
-            writer.flush();
+            sendErrorResponse(response, "Missing or invalid Authorization header");
             return;
         }
 
@@ -64,26 +53,17 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         try {
             if (!jwtTokenUtil.validateToken(token)) {
                 log.warn("Invalid or expired token: {}", token);
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                response.setContentType("application/json");
-                PrintWriter writer = response.getWriter();
-                writer.write("{\"result\": 0, \"httpCode\": 401, \"message\": \"Token expired\"}");
-                writer.flush();
+                sendErrorResponse(response, "Token expired");
                 return;
             }
         } catch (TokenValidationException e) {
             log.error("Token validation failed: {}", e.getMessage(), e);
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401 Unauthorized
-            response.setContentType("application/json");
-            PrintWriter writer = response.getWriter();
-            writer.write(String.format("{\"result\": 0, \"httpCode\": 401, \"message\": \"%s\"}", e.getMessage()));
-            writer.flush();
+            sendErrorResponse(response, e.getMessage());
             return;
         }
 
         String email = jwtTokenUtil.getEmail(token);
         UserDetails userDetails = userDetailsService.loadUserByUsername(email);
-
         if (userDetails != null) {
             JwtAuthenticationToken authentication = new JwtAuthenticationToken(userDetails, null, userDetails.getAuthorities());
             authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
@@ -91,5 +71,14 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private void sendErrorResponse(HttpServletResponse response, String message) throws IOException {
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setContentType("application/json");
+        try (PrintWriter writer = response.getWriter()) {
+            writer.write(String.format("{\"result\": 0, \"httpCode\": %d, \"message\": \"%s\"}", HttpServletResponse.SC_UNAUTHORIZED, message));
+            writer.flush();
+        }
     }
 }
