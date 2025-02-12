@@ -26,15 +26,6 @@ public class RecommendationController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/recommend/evaluate")
-    public ResponseEntity<FeedbackResponse> evaluateRecommendation(@RequestBody FeedbackRequest feedbackRequest) {
-        recommendationService.saveFeedback(feedbackRequest);
-
-        // 응답 객체 생성
-        FeedbackResponse response = new FeedbackResponse(true, 200, "feedback save");
-
-        return ResponseEntity.ok(response);
-    }
 
     @GetMapping("/recommend/weather")
     public ResponseEntity<FrontendRecommendationResponse> getWeatherRecommendation() {
@@ -42,16 +33,4 @@ public class RecommendationController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/admin/feedback")
-    public ResponseEntity<FeedbackStatisticsDTO> getFeedbackStatistics() {
-        FeedbackStatisticsDTO statistics = recommendationService.getFeedbackStatistics();
-        return ResponseEntity.ok(statistics);
-    }
-
-    @GetMapping("/recommend/rating")
-    public ResponseEntity<?> getTopRatedLiquors() {
-        List<RatingDTO> ratings = recommendationService.getTopRatedLiquors();
-        log.info("{\"result\": 1, \"httpCode\": 200, \"data\": {}}", ratings);
-        return ResponseEntity.ok(new RatingResponse(true, 200, ratings));
-    }
 }
