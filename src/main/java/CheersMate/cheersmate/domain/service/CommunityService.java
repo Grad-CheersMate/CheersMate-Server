@@ -4,6 +4,7 @@ import CheersMate.cheersmate.domain.dto.CommunityRequestDto;
 import CheersMate.cheersmate.domain.dto.CommunityResponseDto;
 import CheersMate.cheersmate.domain.entity.Community;
 import CheersMate.cheersmate.domain.repository.CommunityRepository;
+import CheersMate.cheersmate.domain.storage.ImageStorageService;
 import CheersMate.cheersmate.users.entity.Users;
 import CheersMate.cheersmate.users.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,8 @@ import java.util.stream.Collectors;
 public class CommunityService {
     private final CommunityRepository communityRepository;
     private final UserRepository userRepository;
+    private final ImageStorageService imageStorageService;
+    private final CommunityLikeService communityLikeService;
 
     @Transactional
     public CommunityResponseDto createCommunity(CommunityRequestDto dto) {
@@ -48,18 +51,26 @@ public class CommunityService {
         return convertToDto(updatedCommunity);
     }
 
+    @Transactional
+    public void deleteCommunity(Long communityId) {
+        Community community = communityRepository.findById(communityId)
+                .orElseThrow(() -> new RuntimeException("Community not found with id: " + communityId));
+        // 파일 삭제를 서비스 계층에서 처리하면, 예외 발생 시 트랜잭션 롤백 가능
+        if (community.getImageLink() != null && !community.getImageLink().isEmpty()) {
+            try {
+                imageStorageService.deleteImage(community.getImageLink());
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to delete image from storage", e);
+            }
+        }
+        communityRepository.delete(community);
+    }
+
     @Transactional(readOnly = true)
     public CommunityResponseDto getCommunity(Long communityId) {
         Community community = communityRepository.findById(communityId)
                 .orElseThrow(() -> new RuntimeException("Community not found with id: " + communityId));
         return convertToDto(community);
-    }
-
-    @Transactional
-    public void deleteCommunity(Long communityId) {
-        Community community = communityRepository.findById(communityId)
-                .orElseThrow(() -> new RuntimeException("Community not found with id: " + communityId));
-        communityRepository.delete(community);
     }
 
     @Transactional(readOnly = true)
@@ -82,6 +93,10 @@ public class CommunityService {
         if (community.getUser() != null) {
             dto.setUserId(community.getUser().getUserId());
         }
+
+        Long likeCount = communityLikeService.countLikes(community.getCommunityId());
+        dto.setLikeCount(likeCount);
+
         return dto;
     }
 }

@@ -5,14 +5,9 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Data
-public class CommunityResponseDto {
+public class CommunityLikeResponseDto {
+    private Long likeId;
     private Long communityId;
     private Long userId;
-    private String title;
-    private String imageLink;
-    private String description;
     private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
-
-    private Long likeCount;
 }
