@@ -56,7 +56,7 @@ CheersMate는 사용자의 상황과 선호도에 맞는 최적의 주류와 안
 ## 🛠 **기술 스택**
 | 구분 | 기술 |
 |------|------|
-| **Frontend** | HTML, CSS, JavaScript, Thymeleaf |
+| **Frontend** | HTML, CSS, JavaScript, Thymeleaf, IOS |
 | **Backend** | Java 17, Spring Boot 3.3.4, Spring Security, Spring Batch |
 | **AI/ML** | Python, Flask, 머신러닝 알고리즘 |
 | **Database** | MySQL, JPA, Hibernate |
