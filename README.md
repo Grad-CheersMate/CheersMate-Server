@@ -69,7 +69,7 @@ CheersMate는 사용자의 상황과 선호도에 맞는 최적의 주류와 안
 
 ## 🏗 **시스템 아키텍처**
 
-![시스템 아키텍처](https://github.com/user-attachments/assets/65fda520-735c-4783-9976-54d5252fa41c)
+![시스템 아키텍처](https://github.com/user-attachments/assets/342fecca-a020-4390-b10f-e4f410701c38)
 
 ### 🔹 아키텍처 설명
 - **Spring Boot 백엔드**: 주류 데이터 관리, 사용자 인증, API 제공
